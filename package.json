@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mattandbucs34/bloccit.git"
+    "url": "https://github.com/mattandbucs34/bloccit.git"
   },
   "author": "Matt Johnson",
   "license": "ISC",
