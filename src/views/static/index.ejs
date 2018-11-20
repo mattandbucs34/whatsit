@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <% include ./partials/head.ejs %>
+  </head>
+  <body>
+
+    <!-- Navigation -->
+    <% include ./partials/navbar.ejs %>
+
+    <!-- Page Content -->
+    <main class="container">
+
+      <!-- Jumbotron Header -->
+      <header class="jumbotron my-4">
+        <h1 class="display-3">Welcome to Bloccit Whatsit</h1>
+        <p class="lead">An application for users to share information or anything else they may want to share</p>
+        <a href="#" class="btn btn-primary btn-lg">Sign Up</a>
+      </header>
+
+      <!-- Page Features -->
+      <section class="row text-center">
+
+        <section class="col-lg-4">
+          <h4 class="card-title">Post</h4>
+          <p class="card-text">Share your deepest, darkest secrets</p>
+        </section>
+
+        <section class="col-lg-4">
+          <h4 class="card-title">Comment</h4>
+          <p class="card-text">Share your opinions to rile everyone up</p>
+        </section>
+
+        <section class="col-lg-4">
+          <h4 class="card-title">Stay Informed</h4>
+          <p class="card-text">Get misinformation to argue your point incorrectly</p>
+        </section>
+
+      </section>
+      <!-- end of row-->
+    </main>
+    <!-- end of container -->
+
+    <% include ./partials/baseScripts.ejs %>
+  </body>
+</html>

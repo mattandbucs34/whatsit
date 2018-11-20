@@ -7,7 +7,7 @@ const routeConfig = require("./config/route-config.js");
   res.send("Welcome to Bloccit")
 }); */
 
-appConfig.init();
+appConfig.init(app, express);
 routeConfig.init(app);
 
 module.exports = app;

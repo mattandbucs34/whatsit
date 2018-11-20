@@ -1,0 +1,1 @@
+The reason for using RERO is that each update is specific to user design, essentially providing a better user experience with each update. One reason against it, in my opinion, would be the constant updates would turn the user away. If there are too many updates in a short period of time, the user could consider the product as a 'buggy' product and they would avoid it. 
