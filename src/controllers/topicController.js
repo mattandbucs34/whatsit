@@ -1,3 +1,5 @@
+const topicQueries = require("../db/queries.topics.js");
+
 module.exports = {
   index(req, res, next) {
     topicQueries.getAllTopics((err, topics) => {
