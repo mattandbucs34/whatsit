@@ -1,3 +1,4 @@
+const topicQueries = require("../db/queries.topics.js");
 module.exports = {
   index(req, res, next) {
     topicQueries.getAllTopics((err, topics) => {
@@ -7,5 +8,8 @@ module.exports = {
         res.render("topics/index", {topics});
       }
     })
+  },
+  new(req, res, next) {
+    res.render("topics/new");
   }
 }
