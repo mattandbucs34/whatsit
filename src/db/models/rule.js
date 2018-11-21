@@ -1,12 +1,13 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   var Rule = sequelize.define('Rule', {
+    source: DataTypes.STRING,
     description: DataTypes.STRING,
     topicId: {
-      type: Sequelize.INTEGER,
+      type: DataTypes.INTEGER,
       onDelete: "CASCADE",
       references: {
-        model: "Topic",
+        model: "Topics",
         key: "id",
         as: "topicId",
       }
