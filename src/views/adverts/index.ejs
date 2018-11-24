@@ -5,15 +5,17 @@
 </head>
 <body>
   <% include ../static/partials/navbar.ejs %>
-  <main class="container">
-    
 
-    <h1>Topics</h1>
+  <main class="container">
+
+    <h1>Advertisements</h1>
+
     <ul class="list-group">
-      <% topics.forEach((topic) => { %>
-        <li class="list-group-item">
-          <a href="/topics/<%= topic.id %>"> <%= topic.title %> </a>
-        </li>
+      <% adverts.forEach((advert) => { %>
+      
+      <li class="list-group-item">
+        <a href="/adverts/<%= advert.id %>"><%= advert.title %></a>
+      </li>
       <% }) %>
     </ul>
   </main>

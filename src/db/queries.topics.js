@@ -3,11 +3,9 @@ const Topic = require("./models").Topic;
 module.exports = {
   
   getAllTopics(callback) {
-    return Topic.all()
-    .then((topics) => {
+    return Topic.all().then((topics) => {
       callback(null, topics);
-    })
-    .catch((err) => {
+    }).catch((err) => {
       callback(err);
     })
   },
