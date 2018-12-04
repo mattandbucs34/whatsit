@@ -31,6 +31,8 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: "topicId",
       as: "posts"
     });
+
+    Topic.hasOne(models.Flair);
   };
   return Topic;
 };

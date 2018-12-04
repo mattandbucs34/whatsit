@@ -20,6 +20,8 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: "topicId",
       onDelete: "CASCADE"
     });
+
+    Post.hasOne(models.Flair);
   };
   return Post;
 };

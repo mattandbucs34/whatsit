@@ -7,14 +7,14 @@
   <% include ../static/partials/navbar.ejs %>
 
   <main class="container">
-    <h1><%= advert.title %></h1>
+    <h1><%= flair.name %></h1>
 
-    <a href="/adverts/<%= advert.id %>/edit" class="btn btn-warning">Edit</a>
+    <!-- <a href="/flairs/<%= flair.color %>/edit" class="btn btn-warning">Edit</a> -->
 
-    <form style="display:initial" action="/adverts/<%= advert.id %>/destroy" method="POST">
+    <form style="display:initial" action="/flairs/<%= flair.id %>/destroy" method="POST">
       <button type="submit" class="btn btn-danger">Delete</button>
     </form>
-    <p><%= advert.description %></p>
+    <p style="background-color: '<%= flair.color %>'"><%= flair.color %></p>
   </main>
 
   <% include ../static/partials/baseScripts.ejs %>
