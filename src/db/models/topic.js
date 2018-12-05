@@ -33,8 +33,7 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Topic.hasOne(models.Flair, {
-      through: 'TopicFlair',
-      foreignKey: 'topicId'
+      through: 'TopicFlair'
     });
   };
   return Topic;

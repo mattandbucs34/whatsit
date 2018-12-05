@@ -15,11 +15,11 @@ module.exports = (sequelize, DataTypes) => {
     Flair.belongsToMany(models.Topic, {
       through: 'TopicFlair',
       foreignKey: 'topicId'
-    }),
+    })/* ,
 
     Flair.belongsToMany(models.Post, {
       through: 'PostFlair'
-    })
+    }) */
   };
   return Flair;
 };

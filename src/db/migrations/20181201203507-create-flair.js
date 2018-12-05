@@ -23,16 +23,6 @@ module.exports = {
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
-      },
-      topicId: {
-        type: Sequelize.INTEGER,
-        onDelete: "CASCADE",
-        allowNull: false,
-        references: {
-          model: "Topics",
-          key: "id",
-          as: "topicId"
-        },
       }
     });
   },
