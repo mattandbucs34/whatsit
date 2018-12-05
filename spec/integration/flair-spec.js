@@ -35,8 +35,8 @@ describe("routes : flairs", () => {
           name: "Green Flair",
           color: "green"
         }).then((flair) => {
-          this.flair = flair;
-          this.topic.setFlair(this.flair);
+          this.flair = flair;/* 
+          this.topic.setFlair(this.flair); */
           done();
         }).catch((err) => {
           console.log(err);
@@ -103,6 +103,41 @@ describe("routes : flairs", () => {
             expect(flairs.length).toBe(flairCountBeforeDelete - 1);
             done();
           })
+        });
+      });
+    });
+  });
+
+  describe("GET /flairs/:id/edit", () => {
+    it("should render a view with a Flair edit form", (done) => {
+      request.get(`${base}${this.flair.id}/edit`, (err, res, body) => {
+        expect(err).toBeNull();
+        expect(body).toContain("Edit Flair");
+        expect(body).toContain("Green Flair");
+        done();
+      });
+    });
+  });
+
+  describe("POST /flairs/:id/update", () => {
+    it("should update the flair with the given values", (done) => {
+      const options = {
+        url: `${base}${this.flair.id}/update`,
+        form: {
+          name: "Not for the squeamish",
+          color: "olive"
+        }
+      };
+
+      request.post(options, (err, res, body) => {
+        expect(err).toBeNull();
+
+        Flair.findOne({
+          where: {id: this.flair.id}
+        }).then((flair) => {
+          expect(flair.name).toBe("Not for the squeamish");
+          expect(flair.color).toBe("olive");
+          done();
         });
       });
     });

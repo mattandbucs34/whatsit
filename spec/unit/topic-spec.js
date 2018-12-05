@@ -54,9 +54,6 @@ describe("Topic", () => {
         expect(associatedPost[0].body).toBe("Kings and Queens have titles, as do peasants and peons");
         expect(associatedPost[0].topicId).toBe(this.topic.id);
         done();
-/*       }).catch((err) => {
-        console.log(err);
-        done(); */
       });
     });
   });

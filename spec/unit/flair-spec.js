@@ -26,19 +26,20 @@ describe("Flair", () => {
           console.log(err);
           done();
         });
-
-        Flair.create({
-          name: "Green Flair",
-          color: "green"
-        }).then((flair) => {
-          this.flair = flair;
-          this.topic.setFlair(this.flair);
-          done();
-        }).catch((err) => {
-          console.log(err);
-          done();
-        });
       });
+
+      Flair.create({
+        name: "Green Flair",
+        color: "green"
+      }).then((flair) => {
+        this.flair = flair;
+        /* this.topic.setFlair(this.flair); */
+        done();
+      }).catch((err) => {
+        console.log(err);
+        done();
+      });
+      
     });
   });
 

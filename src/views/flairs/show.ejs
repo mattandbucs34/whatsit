@@ -9,7 +9,7 @@
   <main class="container">
     <h1><%= flair.name %></h1>
 
-    <!-- <a href="/flairs/<%= flair.color %>/edit" class="btn btn-warning">Edit</a> -->
+    <a href="/flairs/<%= flair.color %>/edit" class="btn btn-warning">Edit</a>
 
     <form style="display:initial" action="/flairs/<%= flair.id %>/destroy" method="POST">
       <button type="submit" class="btn btn-danger">Delete</button>

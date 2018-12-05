@@ -30,13 +30,7 @@ module.exports = {
       include: [{
         model: Post,
         as: "posts"
-      },
-      
-      {
-        model: Flair,
-        as: "flair"
-      }
-    ]
+      }]
     })
     .then((topic) => {
       callback(null, topic);
