@@ -21,10 +21,12 @@ module.exports = {
 
   show(req, res, next) {
     flairQueries.getFlair(req.params.id, (err, flair) => {
-      if(err || flair == null)
+      if(err || flair == null) {
+        console.log(err);
         res.redirect(404, "/");
-      else
+      }else {
         res.render("flairs/show", {flair});
+      }
     });
   },
 
