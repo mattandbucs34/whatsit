@@ -32,9 +32,9 @@ module.exports = (sequelize, DataTypes) => {
       as: "posts"
     });
 
-    Topic.hasOne(models.Flair, {
+/*     Topic.hasOne(models.Flair, {
       through: 'TopicFlair'
-    });
+    }); */
   };
   return Topic;
 };
