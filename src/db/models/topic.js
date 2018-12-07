@@ -8,6 +8,9 @@ module.exports = (sequelize, DataTypes) => {
     description: {
       type: DataTypes.STRING,
       allowNull: false
+    },
+    flairId: {
+      type: DataTypes.INTEGER
     }
   }, {});
   Topic.associate = function(models) {
@@ -32,9 +35,10 @@ module.exports = (sequelize, DataTypes) => {
       as: "posts"
     });
 
-/*     Topic.hasOne(models.Flair, {
-      through: 'TopicFlair'
-    }); */
+    Topic.hasOne(models.Flair, {
+      foreignKey: "id",
+      as: 'flair'
+    });
   };
   return Topic;
 };

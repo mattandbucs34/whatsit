@@ -1,6 +1,16 @@
 const flairQueries = require("../db/queries.flairs.js");
 
 module.exports = {
+  index(req, res, next) {
+    flairQueries.getAllFlairs((err, flairs) => {
+      if(err) {
+        res.redirect(500, "static/index");
+      }else {
+        res.render("flairs/index", {flairs});
+      }
+    })
+  },
+
   new(req, res, next) {
     res.render("flairs/new");
   },
@@ -52,6 +62,7 @@ module.exports = {
 
   update(req, res, next) {
     flairQueries.updateFlair(req.params.id, req.body, (err, flair) => {
+      console.log(err);
       if(err || flair == null) {
         res.redirect(404, `/flairs/${req.params.id}/edit`);
       }else {
