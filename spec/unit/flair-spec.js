@@ -9,6 +9,8 @@ describe("Flair", () => {
     this.post;
     this.flair;
     sequelize.sync({force: true}).then((res) => {
+
+
       Topic.create({
         title: "Hunger Games",
         description: "How do you want to be remembered?"
@@ -27,19 +29,18 @@ describe("Flair", () => {
           done();
         });
       });
-
+      
       Flair.create({
         name: "Green Flair",
         color: "green"
       }).then((flair) => {
         this.flair = flair;
-        /* this.topic.setFlair(this.flair); */
+        this.topic.setFlair(this.flair);
         done();
       }).catch((err) => {
         console.log(err);
         done();
       });
-      
     });
   });
 
@@ -66,8 +67,8 @@ describe("Flair", () => {
         color: "navy"
       }).then((newFlair) => {
         
-        this.topic.setFlair(newFlair).then((flair) => {
-          expect(flair.color).toBe("navy");
+        this.topic.setFlair(newFlair).then((topic) => {
+          expect(topic.flairId).toBe(newFlair.id);
           done();
         });
       });
@@ -76,7 +77,6 @@ describe("Flair", () => {
 
   describe("#getFlair()", () => {
     it("should return the associated flair", (done) => {
-      //console.log(this.topic.getFlair());
       this.topic.getFlair().then((associatedFlair) => {
         expect(associatedFlair.color).toBe("green");
         done();

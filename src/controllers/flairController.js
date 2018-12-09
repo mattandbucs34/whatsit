@@ -17,22 +17,21 @@ module.exports = {
 
   create(req, res, next) {
     let newFlair = {
-      name: req.body.flairName,
-      color: req.body.flairColor
+      name: req.body.name,
+      color: req.body.color
     };
     flairQueries.addFlair(newFlair, (err, flair) => {
       if(err) {
         res.redirect(500, "/flairs/new");
       }else {
-        res.redirect(303, `/flairs/${flair.id}`);
+        res.redirect(303, `/flairs/${flair.name}`);
       }
     });
   },
 
   show(req, res, next) {
-    flairQueries.getFlair(req.params.id, (err, flair) => {
+    flairQueries.getFlair(req.params.name, (err, flair) => {
       if(err || flair == null) {
-        console.log(err);
         res.redirect(404, "/");
       }else {
         res.render("flairs/show", {flair});
@@ -41,9 +40,9 @@ module.exports = {
   },
 
   destroy(req, res, next) {
-    flairQueries.deleteFlair(req.params.id, (err, flair) => {
+    flairQueries.deleteFlair(req.params.name, (err, flair) => {
       if(err) {
-        res.redirect(500, `/flairs/${req.params.id}`);
+        res.redirect(500, `/flairs/${req.params.name}`);
       }else {
         res.redirect(303, `/flairs`);
       }
@@ -51,7 +50,7 @@ module.exports = {
   },
 
   edit(req, res, next) {
-    flairQueries.getFlair(req.params.id, (err, flair) => {
+    flairQueries.getFlair(req.params.name, (err, flair) => {
       if(err || flair == null) {
         res.redirect(404, "/");
       }else {
@@ -61,12 +60,11 @@ module.exports = {
   },
 
   update(req, res, next) {
-    flairQueries.updateFlair(req.params.id, req.body, (err, flair) => {
-      console.log(err);
+    flairQueries.updateFlair(req.params.name, req.body, (err, flair) => {
       if(err || flair == null) {
-        res.redirect(404, `/flairs/${req.params.id}/edit`);
+        res.redirect(404, `/flairs/${req.params.name}/edit`);
       }else {
-        res.redirect(`/flairs/${flair.id}`);
+        res.redirect(`/flairs/${flair.name}`);
       }
     });
   } 

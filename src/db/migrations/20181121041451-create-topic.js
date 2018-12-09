@@ -27,12 +27,14 @@ module.exports = {
       flairId: {
         type: Sequelize.INTEGER,
         onDelete: "CASCADE",
+        allowNull: true,
         references: {
           model: "Flairs",
           key: "id",
-          as: "flairId",
-        },
+          as: "flairId"
+        }, 
       }
+      
     });
   },
   down: (queryInterface, Sequelize) => {

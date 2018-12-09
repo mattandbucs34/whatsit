@@ -8,7 +8,7 @@
   <main class="container">
     <h1>Edit Flair</h1>
 
-    <form action="/flairs/<%= flair.id %>/update" method="POST">
+    <form action="/flairs/<%= flair.name %>/update" method="POST">
       <div class="form-group">
         <label for="name">Flair Name</label>
         <input value="<%= flair.name %>" type="text" class="form-control" name="name" aria-describedby="flairHelp" placeholder="Enter Flair Name">

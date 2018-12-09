@@ -1,17 +1,18 @@
 'use strict';
+
 const faker = require("faker");
 
-let postMessage = [];
+let flairs = [];
 
 for(let i = 0; i < 15; i++) {
-  postMessage.push({
-    title: faker.hacker.noun(),
-    body: faker.hacker.phrase(),
+  flairs.push({
+    name: faker.hacker.noun(),
+    color: faker.internet.color(),
     createdAt: new Date(),
-    updatedAt: new Date(),
-    topicId: faker.random.arrayElement([1,2,3,4,5,6,7,8,9,10])
+    updatedAt: new Date()
   });
 }
+
 module.exports = {
   up: (queryInterface, Sequelize) => {
     /*
@@ -24,7 +25,7 @@ module.exports = {
         isBetaMember: false
       }], {});
     */
-    return queryInterface.bulkInsert("Posts", postMessage, {});
+    return queryInterface.bulkInsert("Flairs", flairs, {});
   },
 
   down: (queryInterface, Sequelize) => {
@@ -35,6 +36,6 @@ module.exports = {
       Example:
       return queryInterface.bulkDelete('Person', null, {});
     */
-    return queryInterface.bulkDelete("Posts", null, {});
+    return queryInterface.bulkDelete("Flairs", null, {});
   }
 };

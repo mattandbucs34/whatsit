@@ -124,9 +124,29 @@ describe("routes : posts", () => {
         Post.findOne({
           where: {id: this.post.id}
         }).then((post) => {
-          expect(post.title).toBe("Snowman building competition");
+          expect(post.title).toBe("Donner Party");
           done();
         });
+      });
+    });
+  });
+
+  it("should not created a post that fails validation", (done) => {
+    const options = {
+      url: `${base}/${this.topic.id}/posts/create`,
+      form: {
+        title: "a",
+        body: "b"
+      }
+    };
+
+    request.post(options, (err, res, body) => {
+      Post.findOne({where: {title: "a"}}).then((post) => {
+        expect(post).toBeNull();
+        done();
+      }).catch((err) => {
+        console.log(err);
+        done();
       });
     });
   });

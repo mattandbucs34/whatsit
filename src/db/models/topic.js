@@ -35,9 +35,9 @@ module.exports = (sequelize, DataTypes) => {
       as: "posts"
     });
 
-    Topic.hasOne(models.Flair, {
-      foreignKey: "id",
-      as: 'flair'
+    Topic.belongsTo(models.Flair, {
+      foreignKey: "flairId",
+      onDelete: "CASCADE"
     });
   };
   return Topic;

@@ -13,6 +13,16 @@ describe("routes : flairs", () => {
     this.flair;
 
     sequelize.sync({force: true}).then((res) => {
+      Flair.create({
+        name: "Green Flair",
+        color: "green"
+      }).then((flair) => {
+        this.flair = flair;
+      }).catch((err) => {
+        console.log(err);
+        done();
+      });
+
       Topic.create({
         title: "Hunger Games",
         description: "How do you want to be remembered?"
@@ -30,19 +40,8 @@ describe("routes : flairs", () => {
           console.log(err);
           done();
         });
-
-        Flair.create({
-          name: "Green Flair",
-          color: "green"
-        }).then((flair) => {
-          this.flair = flair;/* 
-          this.topic.setFlair(this.flair); */
-          done();
-        }).catch((err) => {
-          console.log(err);
-          done();
-        });
       });
+      
     });
   });
 
@@ -61,14 +60,13 @@ describe("routes : flairs", () => {
       const options = {
         url: `${base}create`,
         form: {
-          flairName: "Pink is a Warning",
-          flairColor: "pink"
+          name: "Pink is a Warning",
+          color: "pink"
         }
       };
       request.post(options, (err, res, body) => {
         Flair.findOne({where: {name: "Pink is a Warning"}})
         .then((flair) => {
-          expect(flair).not.toBeNull();
           expect(flair.name).toBe("Pink is a Warning");
           expect(flair.color).toBe("pink");
           done();
@@ -80,9 +78,9 @@ describe("routes : flairs", () => {
     });
   });
 
-  describe("GET /flairs/:id", () => {
+  describe("GET /flairs/:name", () => {
     it("should render a view with the selected Flair", (done) => {
-      request.get(`${base}${this.flair.id}`, (err, res, body) => {
+      request.get(`${base}${this.flair.name}`, (err, res, body) => {
         expect(err).toBeNull();
         expect(body).toContain("Green Flair");
         done();
@@ -90,14 +88,14 @@ describe("routes : flairs", () => {
     });
   });
 
-  describe("POST /flairs/:id/destroy", () => {
+  describe("POST /flairs/:name/destroy", () => {
     it("should delete the flair with the associated color", (done) => {
       Flair.all().then((flairs) => {
         const flairCountBeforeDelete = flairs.length;
 
         expect(flairCountBeforeDelete).toBe(1);
 
-        request.post(`${base}${this.flair.id}/destroy`, (err, res, body) => {
+        request.post(`${base}${this.flair.name}/destroy`, (err, res, body) => {
           Flair.all().then((flairs) => {
             expect(err).toBeNull();
             expect(flairs.length).toBe(flairCountBeforeDelete - 1);
@@ -108,9 +106,9 @@ describe("routes : flairs", () => {
     });
   });
 
-  describe("GET /flairs/:id/edit", () => {
+  describe("GET /flairs/:name/edit", () => {
     it("should render a view with a Flair edit form", (done) => {
-      request.get(`${base}${this.flair.id}/edit`, (err, res, body) => {
+      request.get(`${base}${this.flair.name}/edit`, (err, res, body) => {
         expect(err).toBeNull();
         expect(body).toContain("Edit Flair");
         expect(body).toContain("Green Flair");
@@ -119,10 +117,10 @@ describe("routes : flairs", () => {
     });
   });
 
-  describe("POST /flairs/:id/update", () => {
+  describe("POST /flairs/:name/update", () => {
     it("should update the flair with the given values", (done) => {
       const options = {
-        url: `${base}${this.flair.id}/update`,
+        url: `${base}${this.flair.name}/update`,
         form: {
           name: "Not for the squeamish",
           color: "olive"
@@ -133,7 +131,7 @@ describe("routes : flairs", () => {
         expect(err).toBeNull();
 
         Flair.findOne({
-          where: {id: this.flair.id}
+          where: {name: "Not for the squeamish"}
         }).then((flair) => {
           expect(flair.name).toBe("Not for the squeamish");
           expect(flair.color).toBe("olive");
