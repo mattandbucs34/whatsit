@@ -10,7 +10,13 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     flairId: {
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
+      onDelete: "CASCADE",
+      references: {
+        model: "Flairs",
+        key: "id",
+        as: "flairId"
+      }
     }
   }, {});
   Topic.associate = function(models) {
@@ -35,9 +41,9 @@ module.exports = (sequelize, DataTypes) => {
       as: "posts"
     });
 
-    Topic.hasOne(models.Flair, {
-      foreignKey: "id",
-      as: 'flair'
+    Topic.belongsTo(models.Flair, {
+      foreignKey: "flairId",
+      onDelete: "CASCADE"
     });
   };
   return Topic;

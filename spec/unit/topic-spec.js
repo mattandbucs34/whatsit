@@ -8,10 +8,9 @@ describe("Topic", () => {
     this.topic;
     this.post;
     sequelize.sync({force: true}).then((res) => {
-
-      Topic.create({
+    Topic.create({
         title: "What's in a title?",
-        description: "Titles are insignifigant"
+        description: "Titles are insignifigant",
       }).then((topic) => {
         this.topic = topic;
 
@@ -21,9 +20,9 @@ describe("Topic", () => {
           topicId: this.topic.id
         }).then((post) => {
           this.post = post;
+          
           done();
         });
-
       }).catch((err) => {
         console.log(err);
         done();

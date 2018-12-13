@@ -30,7 +30,7 @@ module.exports = {
       include: [{
         model: Post,
         as: "posts"
-      }]
+      }],
     })
     .then((topic) => {
       callback(null, topic);

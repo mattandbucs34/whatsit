@@ -35,8 +35,7 @@ describe("routes : flairs", () => {
           name: "Green Flair",
           color: "green"
         }).then((flair) => {
-          this.flair = flair;/* 
-          this.topic.setFlair(this.flair); */
+          this.flair = flair;
           done();
         }).catch((err) => {
           console.log(err);
@@ -57,14 +56,14 @@ describe("routes : flairs", () => {
   });
 
   describe("POST /flairs/create", () => {
+    const options = {
+      url: `${base}create`,
+      form: {
+        flairName: "Pink is a Warning",
+        flairColor: "pink"
+      }
+    };
     it("should created a new flair and redirect", (done) => {
-      const options = {
-        url: `${base}create`,
-        form: {
-          flairName: "Pink is a Warning",
-          flairColor: "pink"
-        }
-      };
       request.post(options, (err, res, body) => {
         Flair.findOne({where: {name: "Pink is a Warning"}})
         .then((flair) => {

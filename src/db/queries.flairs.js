@@ -42,7 +42,6 @@ module.exports = {
   }, 
 
   updateFlair(id, updatedFlair, callback) {
-    console.log(updatedFlair);
     return Flair.findById(id).then((flair) => {
       if(!flair) {
         return callback("Flair not found");

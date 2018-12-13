@@ -25,13 +25,13 @@ module.exports = {
         type: Sequelize.DATE
       },
       flairId: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         onDelete: "CASCADE",
         references: {
           model: "Flairs",
           key: "id",
-          as: "flairId",
-        },
+          as: "flairId"
+        }
       }
     });
   },

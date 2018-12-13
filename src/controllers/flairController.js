@@ -32,7 +32,6 @@ module.exports = {
   show(req, res, next) {
     flairQueries.getFlair(req.params.id, (err, flair) => {
       if(err || flair == null) {
-        console.log(err);
         res.redirect(404, "/");
       }else {
         res.render("flairs/show", {flair});
@@ -62,7 +61,6 @@ module.exports = {
 
   update(req, res, next) {
     flairQueries.updateFlair(req.params.id, req.body, (err, flair) => {
-      console.log(err);
       if(err || flair == null) {
         res.redirect(404, `/flairs/${req.params.id}/edit`);
       }else {

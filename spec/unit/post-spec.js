@@ -28,7 +28,7 @@ describe("Post", () => {
         console.log(err);
         done();
       });
-    })
+    });
   });
 
   describe("#create()", () => {

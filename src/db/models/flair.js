@@ -8,12 +8,21 @@ module.exports = (sequelize, DataTypes) => {
     color: {
       type: DataTypes.STRING,
       allowNull: false
-    }
+    }/* ,
+    topicId: {
+      type: DataTypes.INTEGER,
+      onDelete: "CASCADE",
+      references: {
+        model: "Topics",
+        key: "id",
+        as: "topicId",
+      }
+    } */
   }, {});
   Flair.associate = function(models) {
     // associations can be defined here
-    Flair.belongsTo(models.Topic, {
-      foreignKey: "id",
+    Flair.hasOne(models.Topic, {
+      foreignKey: "flairId",
       as: "flair"
     })
   };

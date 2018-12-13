@@ -23,14 +23,14 @@ module.exports = {
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
-      },
-      /* flairId: {
+      }/* ,
+      topicId: {
         type: Sequelize.INTEGER,
         onDelete: "CASCADE",
         references: {
-          model: "Flairs",
+          model: "Topics",
           key: "id",
-          as: "flairId",
+          as: "topicId",
         },
       } */
     });
