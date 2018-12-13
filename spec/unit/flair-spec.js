@@ -58,27 +58,11 @@ describe("Flair", () => {
       });
     });
   });
-
-  describe("#setTopic()", () => {
-    it("should associate a topic with a flair", (done) => {
-      Flair.create({
-        name: "Blue Flair",
-        color: "navy"
-      }).then((newFlair) => {
-        
-        this.topic.setFlair(newFlair).then((topic) => {
-          expect(topic.flairId).toBe(newFlair.id);
-          done();
-        });
-      });
-    });
-  });
-
+  
   describe("#getFlair()", () => {
     it("should return the associated flair", (done) => {
-      //console.log(this.topic.getFlair());
-      this.topic.getFlair().then((associatedTopic) => {
-        expect(associatedTopic[0].color).toBe("green");
+      this.topic.getFlair().then((associatedFlair) => {
+        expect(associatedFlair.color).toBe("green");
         done();
       });
       done();

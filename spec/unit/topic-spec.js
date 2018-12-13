@@ -1,6 +1,7 @@
 const sequelize = require("../../src/db/models/index").sequelize;
 const Topic = require("../../src/db/models").Topic;
 const Post = require("../../src/db/models").Post;
+const Flair = require("../../src/db/models").Flair;
 
 describe("Topic", () => {
 
@@ -42,6 +43,20 @@ describe("Topic", () => {
       }).catch((err) => {
         console.log(err);
         done();
+      });
+    });
+  });
+
+  describe("#setFlair()", () => {
+    it("should associate a topic with a flair", (done) => {
+      Flair.create({
+        name: "Blue Flair",
+        color: "navy"
+      }).then((newFlair) => {
+        this.topic.setFlair(newFlair).then((topic) => {
+          expect(newFlair.id).toBe(topic.flairId);
+          done();
+        });
       });
     });
   });
