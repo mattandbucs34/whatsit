@@ -131,7 +131,7 @@ describe("routes : posts", () => {
     });
   });
 
-  it("should not created a post that fails validation", (done) => {
+  it("should not create a post that fails validation", (done) => {
     const options = {
       url: `${base}/${this.topic.id}/posts/create`,
       form: {

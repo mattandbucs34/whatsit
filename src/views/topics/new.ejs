@@ -6,16 +6,19 @@
 <body>
   <% include ../static/partials/navbar.ejs %>
   <main class="container">
+    <% include ../static/partials/messages.ejs %>
     <h1>New Topic</h1>
 
     <form action="/topics/create" method="POST">
       <div class="form-group">
         <label for="title">Topic Title</label>
         <input type="text" class="form-control" name="title" aria-describedby="titleHelp" placeholder="Enter Title">
+        <small class="text-muted" id="titleHelp">Title must be 5 or more characters long</small>
       </div>
       <div class="form-group">
         <label for="description">Description</label>
         <textarea rows="4" class="form-control" name="description" placeholder="Enter Description"></textarea>
+        <small class="text-muted" id="descHelp">Description must be 10 or more characters long</small>
       </div>
       <button type="submit" class="btn btn-primary">Submit</button>
     </form>
