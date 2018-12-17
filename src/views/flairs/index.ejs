@@ -13,7 +13,7 @@
       <% flairs.forEach((flair) => { %>
         <li class="list-group-item">
           <a href="/flairs/<%= flair.name %>"> <%= flair.name %> </a>
-          <span><%= flair.color %></span>
+          <span style="background-color:<%= flair.color %>" class="btn btn-sm"><%= flair.color %></span>
         </li>
       <% }) %>
     </ul>
