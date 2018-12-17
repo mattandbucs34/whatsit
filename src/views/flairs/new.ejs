@@ -5,24 +5,22 @@
 </head>
 <body>
   <% include ../static/partials/navbar.ejs %>
-
   <main class="container">
     <h1>New Flair</h1>
+
     <form action="/flairs/create" method="POST">
       <div class="form-group">
-        <label for="flairName">Flair Name</label>
-        <input type="text" class="form-control" name="flairName" placeholder="Enter Flair Name" aria-describedby="nameHelp">
+        <label for="name">Flair Name</label>
+        <input type="text" class="form-control" name="name" aria-describedby="flairNameHelp" placeholder="Enter Flair Name">
       </div>
       <div class="form-group">
-        <label for="flairColor">Choose Flair Color</label>
-        <select class="form-control" name="flairColor" placeholder="Choose Flair Color">
-          <option value="aqua">Aqua</option>
-          <option value="blue">Blue</option>
-          <option value="green">Green</option>
-          <option value="orchid">Purple</option>
-          <option value="red">Red</option>
-          <option value="yellow">Yellow</option>
-        </select>
+        <label for="color">Flair Color</label>
+          <select name="color" aria-describedby="flairColorHelp">
+            <option value="aqua">Aqua</option>
+            <option value="blue">Blue</option>
+            <option value="green">Green</option>
+            <option value="maroon">Maroon</option>
+          </select>
       </div>
       <button type="submit" class="btn btn-primary">Submit</button>
     </form>

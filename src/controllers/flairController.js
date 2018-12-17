@@ -3,12 +3,12 @@ const flairQueries = require("../db/queries.flairs.js");
 module.exports = {
   index(req, res, next) {
     flairQueries.getAllFlairs((err, flairs) => {
-      if(err) {
+      if(err){
         res.redirect(500, "static/index");
       }else {
         res.render("flairs/index", {flairs});
       }
-    })
+    });
   },
 
   new(req, res, next) {
@@ -22,7 +22,7 @@ module.exports = {
     };
     flairQueries.addFlair(newFlair, (err, flair) => {
       if(err) {
-        res.redirect(500, "/flairs/new");
+        res.redirect(505, "/flairs/new");
       }else {
         res.redirect(303, `/flairs/${flair.name}`);
       }
@@ -44,7 +44,7 @@ module.exports = {
       if(err) {
         res.redirect(500, `/flairs/${req.params.name}`);
       }else {
-        res.redirect(303, `/flairs`);
+        res.redirect(303, "/flairs")
       }
     });
   },
@@ -67,5 +67,5 @@ module.exports = {
         res.redirect(`/flairs/${flair.name}`);
       }
     });
-  } 
+  }
 }

@@ -1,21 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <% include ../static/partials/head.ejs %>
 </head>
 <body>
   <% include ../static/partials/navbar.ejs %>
-
   <main class="container">
+    
+
     <h1>Flairs</h1>
-    <ul>
+    <ul class="list-group">
       <% flairs.forEach((flair) => { %>
-        <li>
-          <a href="/flairs/<%= flair.name %>"><%= flair.name %></a>
+        <li class="list-group-item">
+          <a href="/flairs/<%= flair.name %>"> <%= flair.name %> </a>
+          <span style="background-color:<%= flair.color %>" class="btn btn-sm"><%= flair.color %></span>
         </li>
       <% }) %>
     </ul>
   </main>
-
-  <% include ../static/partials/baseScripts.ejs %>
-  
 </body>
 </html>
