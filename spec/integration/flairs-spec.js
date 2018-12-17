@@ -47,8 +47,8 @@ describe("routes : flairs", () => {
     const options = {
       url: `${base}create`,
       form: {
-        flairName: "Zing Flair",
-        flairColor: "grey"
+        name: "Zing Flair",
+        color: "grey"
       }
     };
     it("should create a new flair and redirect", (done) => {
@@ -112,16 +112,15 @@ describe("routes : flairs", () => {
       const options = {
         url: `${base}${this.flair.name}/update`,
         form: {
-          flairName: "Ric Flair WOOOOO",
-          flairColor: "purple"
+          name: "Ric Flair WOOOOO",
+          color: "purple"
         }
       };
-
+      
       request.post(options, (err, res, body) => {
         expect(err).toBeNull();
-
         Flair.findOne({
-          where: { name: this.flair.name }
+          where: { id: this.flair.id }
         }).then((flair) => {
           expect(flair.name).toBe("Ric Flair WOOOOO");
           done();

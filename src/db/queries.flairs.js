@@ -41,7 +41,6 @@ module.exports = {
   },
 
   updateFlair(name, updatedFlair, callback) {
-    console.log(updatedFlair);
     return Flair.findOne({
       where: {name}
     }).then((flair) => {

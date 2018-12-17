@@ -17,8 +17,8 @@ module.exports = {
 
   create(req, res, next) {
     let newFlair = {
-      name: req.body.flairName,
-      color: req.body.flairColor
+      name: req.body.name,
+      color: req.body.color
     };
     flairQueries.addFlair(newFlair, (err, flair) => {
       if(err) {
