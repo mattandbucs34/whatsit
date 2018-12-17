@@ -8,16 +8,15 @@
 
   <main class="container">
     <h1><%= flair.name %></h1>
+    
+    <p><%= flair.color %></p>
 
-    <a href="/flairs/<%= flair.id %>/edit" class="btn btn-warning">Edit</a>
-
-    <form style="display:initial" action="/flairs/<%= flair.id %>/destroy" method="POST">
-      <button type="submit" class="btn btn-danger">Delete</button>
+    <a href="/flairs/<%= flair.name %>/edit" class="btn btn-warning">Edit Flair</a>
+    <form style="display:initial" action="/flairs/<%= flair.name %>/destroy" method="POST">
+      <button type="submit" class="btn btn-danger">Delete Flair</button>
     </form>
-    <p style="background-color: <%= flair.color %>"><%= flair.color %></p>
+
   </main>
-
   <% include ../static/partials/baseScripts.ejs %>
-
 </body>
 </html>
