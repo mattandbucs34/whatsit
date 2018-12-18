@@ -8,9 +8,6 @@ module.exports = (sequelize, DataTypes) => {
     description: {
       type: DataTypes.STRING,
       allowNull: false
-    },
-    flairId: {
-      type: DataTypes.INTEGER
     }
   }, {});
   Topic.associate = function(models) {
@@ -33,11 +30,6 @@ module.exports = (sequelize, DataTypes) => {
     Topic.hasMany(models.Post, {
       foreignKey: "topicId",
       as: "posts"
-    });
-
-    Topic.belongsTo(models.Flair, {
-      foreignKey: "flairId",
-      onDelete: "CASCADE"
     });
   };
   return Topic;

@@ -23,18 +23,7 @@ module.exports = {
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
-      },
-      flairId: {
-        type: Sequelize.INTEGER,
-        onDelete: "CASCADE",
-        allowNull: true,
-        references: {
-          model: "Flairs",
-          key: "id",
-          as: "flairId"
-        }, 
-      }
-      
+      }      
     });
   },
   down: (queryInterface, Sequelize) => {
