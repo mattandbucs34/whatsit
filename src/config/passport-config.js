@@ -29,7 +29,7 @@ module.exports = {
       User.findById(id).then((user) => {
         callback(null, user);
       }).catch((err) => {
-        callback(err);
+        callback(err, user);
       });
     });
   }
