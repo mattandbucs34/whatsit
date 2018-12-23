@@ -4,30 +4,40 @@ const base = "http://localhost:3000/topics";
 const sequelize = require("../../src/db/models/index").sequelize;
 const Topic = require("../../src/db/models").Topic;
 const Post = require("../../src/db/models").Post;
+const User = require("../../src/db/models").User;
 
 describe("routes : posts", () => {
   beforeEach((done) => {
     this.topic;
     this.post;
-    sequelize.sync({force: true}).then((res) => {
-      Topic.create({
-        title: "Winter Games",
-        description: "Post your Winter Games stories"
-      }).then((topic) => {
-        this.topic = topic;
+    this.user;
 
-        Post.create({
-          title: "Donner Party",
-          body: "The Donner Party didn't play many Winter Games",
-          topicId: this.topic.id
-        }).then((post) => {
-          this.post = post;
+    sequelize.sync({force: true}).then((res) => {
+      User.create({
+        email: "shaggy@mysterymachine.com",
+        password: "ScoobySnacks69"
+      }).then((user) => {
+        this.user = user;
+
+        Topic.create({
+          title: "Winter Games",
+          description: "Post your Winter Games stories",
+          posts: [{
+            title: "Donner Party",
+            body: "The Donner Party didn't play many Winter Games",
+            user: this.user.id
+          }]
+        }, {
+          include: {
+            model: Post,
+            as: "posts"
+          }
+        }).then((topic) => {
+          this.topic = topic;
+          this.post = topic.posts[0];
           done();
-        }).catch((err) => {
-          console.log(err);
-          done();
-        });
-      });
+        })
+      })
     });
   });
 

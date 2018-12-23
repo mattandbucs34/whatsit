@@ -1,32 +1,43 @@
 const sequelize = require("../../src/db/models/index").sequelize;
 const Topic = require("../../src/db/models").Topic;
 const Post = require("../../src/db/models").Post;
+const User = require("../../src/db/models").User;
 
 describe("Topic", () => {
 
   beforeEach((done) => {
     this.topic;
     this.post;
+    this.user;
+
     sequelize.sync({force: true}).then((res) => {
+      User.create({
+        email: "shaggy@mysterymachine.com",
+        password: "ScoobySnack69"
+      }).then((user) => {
+        this.user = user;
 
-      Topic.create({
-        title: "What's in a title?",
-        description: "Titles are insignifigant"
-      }).then((topic) => {
-        this.topic = topic;
+        Topic.create({
+          title: "What's in a title?",
+          description: "Titles are insignifigant",
 
-        Post.create({
-          title: "A good title makes the difference",
-          body: "Kings and Queens have titles, as do peasants and peons",
-          topicId: this.topic.id
-        }).then((post) => {
-          this.post = post;
+          posts: [{
+            title: "A good title makes the difference",
+            body: "Kings and Queens have titles, as do peasants and peons",
+            userId: this.user.id
+          }]
+        }, {
+
+          include: {
+            model: Post,
+            as: "posts"
+          }
+        }).then((topic) => {
+          this.topic = topic;
+  
+          this.post = topic.posts[0];
           done();
         });
-
-      }).catch((err) => {
-        console.log(err);
-        done();
       });
     });
   });

@@ -1,34 +1,43 @@
 const sequelize = require("../../src/db/models/index").sequelize;
 const Topic = require("../../src/db/models").Topic;
 const Post = require("../../src/db/models").Post;
+const User = require("../../src/db/models").User;
 
 describe("Post", () => {
 
   beforeEach((done) => {
     this.topic;
     this.post;
-    sequelize.sync({force: true}).then((res) => {
-      
-      Topic.create({
-        title: "Expeditions to Alpha Centauri",
-        description: "A compilation of reports from recent visits to the star system."
-      }).then((topic) => {
-        this.topic = topic;
+    this.user;
 
-        Post.create({
-          title: "My first visit to Proxima Centauri B",
-          body: "I saw some rocks",
-          topicId: this.topic.id
-        }).then((post) => {
-          this.post = post;
+    sequelize.sync({force: true}).then((res) => {
+    
+      User.create({
+        email: "shaggy@mysterymachine.com",
+        password: "ScoobySnack69"
+      }).then((user) => {
+        this.user = user;
+
+        Topic.create({
+          title: "Expeditions to Alpha Centauri",
+          description: "A compilation of reports from recent visits to the star system.",
+          posts: [{
+            title: "My first visit to Proxima Centauri b",
+            body: "I shot the law and the law won",
+            userId: this.user.id
+          }]
+        }, {
+          include: {
+            model: Post,
+            as: "posts"
+          }
+        }).then((topic) => {
+          this.topic = topic;
+          this.post = topic.posts[0];
           done();
-        });
-      
-      }).catch((err) => {
-        console.log(err);
-        done();
-      });
-    })
+        })
+      })
+    });
   });
 
   describe("#create()", () => {
@@ -36,10 +45,13 @@ describe("Post", () => {
       Post.create({
         title: "Pros of Cryosleep during the long journey",
         body: "1. Not having to answer the 'Are we there yet?' question",
-        topicId: this.topic.id
+        topicId: this.topic.id,
+        userId: this.user.id
       }).then((post) => {
         expect(post.title).toBe("Pros of Cryosleep during the long journey");
         expect(post.body).toBe("1. Not having to answer the 'Are we there yet?' question");
+        expect(post.topicId).toBe(this.topic.id);
+        expect(post.userId).toBe(this.user.id);
         done();
       }).catch((err) => {
         console.log(err);
@@ -80,6 +92,31 @@ describe("Post", () => {
     it("should return the associated topic", (done) => {
       this.post.getTopic().then((associatedTopic) => {
         expect(associatedTopic.title).toBe("Expeditions to Alpha Centauri");
+        done();
+      });
+    });
+  });
+
+  describe("#setUser()", () => {
+    it("should associate a post and a user together", (done) => {
+      User.create({
+        email: "velma@mysterymachine.com",
+        password: "n0tJenkie5@@"
+      }).then((newUser) => {
+        expect(this.post.userId).toBe(this.user.id);
+
+        this.post.setUser(newUser).then((post) => {
+          expect(this.post.userId).toBe(newUser.id);
+          done();
+        });
+      })
+    });
+  });
+
+  describe("#getUser()", () => {
+    it("should return the associated topic", (done) => {
+      this.post.getUser().then((associatedUser) => {
+        expect(associatedUser.email).toBe("shaggy@mysterymachine.com");
         done();
       });
     });
