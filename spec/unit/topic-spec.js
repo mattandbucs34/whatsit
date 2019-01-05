@@ -34,7 +34,6 @@ describe("Topic", () => {
           }
         }).then((topic) => {
           this.topic = topic;
-  
           this.post = topic.posts[0];
           done();
         });

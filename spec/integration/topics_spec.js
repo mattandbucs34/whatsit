@@ -26,7 +26,6 @@ describe("routes : topics", () => {
   });
 
   describe("admin user performing CRUD actions for Topic", () => {
-
     beforeEach((done) => {
       User.create({
         email: "velma@mysterymachine.com",
