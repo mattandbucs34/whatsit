@@ -6,10 +6,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   Flair.associate = function(models) {
     // associations can be defined here
-    Flair.hasMany(models.Topic, {
-      foreignKey: "flairId",
-      as: "flairs"
-    });
+    
   };
   return Flair;
 };
