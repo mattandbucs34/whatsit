@@ -8,6 +8,9 @@ module.exports = (sequelize, DataTypes) => {
     description: {
       type: DataTypes.STRING,
       allowNull: false
+    },
+    flairId: {
+      type: DataTypes.INTEGER
     }
   }, {});
   Topic.associate = function(models) {
