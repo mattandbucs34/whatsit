@@ -11,7 +11,7 @@ module.exports = {
     passport.use(new LocalStrategy({
       usernameField: "email"
     }, (email, password, done) => {
-      User.FindOne({
+      User.findOne({
         where: {email}
       }).then((user) => {
         if(!user || !authHelper.comparePass(password, user.password)) {
