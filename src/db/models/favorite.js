@@ -21,6 +21,17 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: "userId",
       onDelete: "CASCADE"
     });
+
+    Favorite.addScope("allFavsFor", (userId) => {
+      return {
+        include: [{
+          model: models.Post
+        }],
+        where: {userId: userId},
+        limit: 15,
+        order: [["createdAt", "DESC"]]
+      }
+    });
   };
   return Favorite;
 };
