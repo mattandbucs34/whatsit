@@ -10,7 +10,6 @@ module.exports = {
       postId: req.params.postId,
       userId: req.user.id
     }).then((favorite) => {
-      console.log(favorite.id);
       callback(null, favorite);
     }).catch((err) => {
       callback(err);
@@ -26,7 +25,7 @@ module.exports = {
       }
 
       const authorized = new Authorizer(req.user, favorite).destroy();
-
+      
       if(authorized) {
         Favorite.destroy({where: {id}}).then((deletedRecordsCount) => {
           callback(null, deletedRecordsCount);
