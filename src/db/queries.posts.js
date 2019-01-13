@@ -4,7 +4,7 @@ const Comment = require("./models").Comment;
 const User = require("./models").User;
 const Vote = require("./models").Vote;
 const Favorite = require("./models").Favorite;
-const Authorizer = require("../policies/posts");
+const Authorizer = require("../policies/post");
 
 module.exports = {
   addPost(newPost, callback) {

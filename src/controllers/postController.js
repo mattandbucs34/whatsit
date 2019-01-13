@@ -1,5 +1,5 @@
 const postQueries = require("../db/queries.posts.js");
-const Authorizer = require("../policies/posts");
+const Authorizer = require("../policies/post");
 
 module.exports = {
   new(req, res, next) {
