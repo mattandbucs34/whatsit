@@ -113,7 +113,7 @@ describe("routes : posts", () => {
             expect(err).toBeNull();
             expect(post).toBeNull();
             done();
-          })
+          });
         });
       });
     });
