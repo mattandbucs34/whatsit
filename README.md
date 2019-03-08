@@ -1,4 +1,4 @@
-#whatsit
+# whatsit
 
 Formerly known as Bloccit, this application is a Reddit-like application. Users can create and edit posts while providing comments and favorites.
 
@@ -6,7 +6,7 @@ Formerly known as Bloccit, this application is a Reddit-like application. Users 
 
 ---
 
-##Resources
+## Resources
 
 * Node.js
 * Express.js
