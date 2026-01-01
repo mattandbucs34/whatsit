@@ -1,25 +1,25 @@
 import { createFavorite, deleteFavorite } from "../db/queries.favorites.js";
 
-export function create(req, res, next) {
+export async function create(req, res, next) {
   if (req.user) {
-    createFavorite(req, (err, favorite) => {
-      if (err) {
-        req.flash("error", err);
-      }
-    });
+    const response = await createFavorite(req);
+
+    if (response.error) {
+      req.flash("error", response.message);
+    }
   } else {
     req.flash("notice", "You must be signed in to do that!");
   }
   res.redirect(req.headers.referer);
 }
-export function destroy(req, res, next) {
+export async function destroy(req, res, next) {
   if (req.user) {
-    deleteFavorite(req, (err, favorite) => {
-      if (err) {
-        req.flash("error", err);
-      }
-      res.redirect(req.headers.referer);
-    });
+    const response = await deleteFavorite(req);
+
+    if (response.error) {
+      req.flash("error", response.message);
+    }
+    res.redirect(req.headers.referer);
   } else {
     req.flash("notice", "You must be signed in to do that!");
     res.redirect(req.headers.referer);

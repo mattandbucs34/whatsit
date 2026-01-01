@@ -1,26 +1,29 @@
 import Comment from "./models";
 import Authorizer from "../policies/comment-policy";
 
-module.exports = {
-  createComment(newComment, callback) {
-    return Comment.create(newComment).then((comment) => {
-      callback(null, comment);
-    }).catch((err) => {
-      callback(err);
-    });
-  },
+export async function createComment(newComment) {
+    try {
+        const response = await Comment.create(newComment);
+        return response;
+    } catch (err) {
+        console.error('There was an issue creating this comment: ', err);
+        return { error: err, message: 'There was an issue creating this comment' };
+    }
+}
 
-  deleteComment(req, callback) {
-    return Comment.findById(req.params.id).then((comment) => {
-      const authorized = new Authorizer(req.user, comment).destroy();
+export async function deleteComment(req) {
+    try {
+        const comment = await Comment.findById(req.params.id);
+        const authorized = new Authorizer(req.user, comment).destroy();
 
-      if (authorized) {
-        comment.destroy();
-        callback(null, comment);
-      } else {
-        req.flash("notice", "You are not authorized to do that!");
-        callback(401);
-      }
-    });
-  }
-};
+        if (authorized) {
+            await comment.destroy();
+            return true;
+        } else {
+            return { error: 'Unauthorized', message: 'You are not authorized to delete this comment' };
+        }
+    } catch (err) {
+        console.error('There was an issue deleting this comment: ', err);
+        return { error: err, message: 'There was an issue deleting this comment' };
+    }
+}

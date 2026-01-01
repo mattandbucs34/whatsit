@@ -2,59 +2,65 @@ import Advert from "./models";
 
 module.exports = {
 
-  getAllAdverts(callback) {
-    return Advert.all().then((adverts) => {
-      callback(null, adverts);
-    }).catch((err) => {
-      callback(err);
-    });
-  },
+    async getAllAdverts() {
+        try {
+            const adverts = await Advert.findAll();
+            return adverts;
+        } catch (err) {
+            return { error: err, message: 'There was an error fetching all adverts' };
+        }
+    },
 
-  addAdvert(newAdvert, callback) {
-    return Advert.create({
-      title: newAdvert.title,
-      description: newAdvert.description
-    })
-      .then((advert) => {
-        callback(null, advert);
-      })
-      .catch((err) => {
-        callback(err);
-      });
-  },
+    async addAdvert(newAdvert) {
+        try {
+            const advert = await Advert.create({
+                title: newAdvert.title,
+                description: newAdvert.description
+            });
+            return advert;
+        } catch (err) {
+            console.error('There was an error processing this request: ', err);
+            return { error: err, message: 'There was an error processing this request' };
+        }
+    },
 
-  getAdvert(id, callback) {
-    return Advert.findById(id).then((advert) => {
-      callback(null, advert);
-    }).catch((err) => {
-      callback(err);
-    });
-  },
+    async getAdvert(id) {
+        try {
+            const advert = await Advert.findById(id);
+            return advert;
+        } catch (err) {
+            console.error('There was an error processing this request: ', err);
+            return { error: err, message: 'There was an error processing this request' };
+        }
+    },
 
-  deleteAdvert(id, callback) {
-    return Advert.destroy({
-      where: { id }
-    }).then((advert) => {
-      callback(null, advert);
-    }).catch((err) => {
-      callback(err);
-    });
-  },
+    async deleteAdvert(id) {
+        try {
+            await Advert.destroy({
+                where: { id }
+            });
+            return true;
+        } catch (err) {
+            console.error('There was an error processing this request: ', err);
+            return { error: err, message: 'There was an error processing this request' };
+        }
+    },
 
-  updateAdvert(id, updatedAdvert, callback) {
-    return Advert.findById(id)
-      .then((advert) => {
+    async updateAdvert(id, updatedAdvert) {
+        const advert = Advert.findById(id);
         if (!advert) {
-          return callback("Topic Not Found");
+            return { error: 'Advert Not Found' };
         }
 
-        advert.update(updatedAdvert, {
-          fields: Object.keys(updatedAdvert)
-        }).then(() => {
-          callback(null, advert);
-        }).catch((err) => {
-          callback(err);
-        });
-      });
-  }
+        try {
+            const updated = await advert.update(updatedAdvert, {
+                fields: Object.keys(updatedAdvert)
+            });
+
+            return updated;
+        } catch (err) {
+            console.error('There was an error processing this request: ', err);
+            return { error: err, message: 'There was an error processing this request' };
+        }
+    }
 };
