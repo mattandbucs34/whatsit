@@ -1,7 +1,4 @@
-const Comment = require("./models").Comment;
-const Post = require("./models").Post;
-const User = require("./models").User;
-const Vote = require("./models").Vote;
+import Vote from "./models";
 
 module.exports = {
   createVote(req, val, callback) {
@@ -11,7 +8,7 @@ module.exports = {
         userId: req.user.id
       }
     }).then((vote) => {
-      if(vote) {
+      if (vote) {
         vote.value = val;
         vote.save().then((vote) => {
           callback(null, vote);
@@ -31,4 +28,4 @@ module.exports = {
       }
     });
   }
-}
+};

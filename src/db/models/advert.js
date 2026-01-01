@@ -1,5 +1,4 @@
-'use strict';
-module.exports = (sequelize, DataTypes) => {
+export default (sequelize, DataTypes) => {
   var Advert = sequelize.define('Advert', {
     title: DataTypes.STRING,
     description: DataTypes.STRING,
@@ -13,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     }
   }, {});
-  Advert.associate = function(models) {
+  Advert.associate = function (models) {
     // associations can be defined here
     Advert.belongsTo(models.Topic, {
       foreignKey: "topicId",

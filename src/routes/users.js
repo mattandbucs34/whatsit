@@ -1,7 +1,7 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const validation = require("./validation-routes");
-const userController = require("../controllers/userController");
+import validation from "./validation-routes";
+import userController from "../controllers/userController";
 
 router.get("/users/sign_up", userController.signUp);
 router.get("/users/sign_in", userController.signInForm);

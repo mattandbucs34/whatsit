@@ -1,6 +1,6 @@
-const ApplicationPolicy = require("./application");
+import ApplicationPolicy from "./application";
 
-module.exports = class FavoritePolicy extends ApplicationPolicy {
+export default class FavoritePolicy extends ApplicationPolicy {
   destroy() {
     return this._isOwner();
   }

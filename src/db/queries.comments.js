@@ -1,7 +1,5 @@
-const Comment = require("./models").Comment;
-const Post = require("./models").Post;
-const User = require("./models").User;
-const Authorizer = require("../policies/comment-policy");
+import Comment from "./models";
+import Authorizer from "../policies/comment-policy";
 
 module.exports = {
   createComment(newComment, callback) {
@@ -16,7 +14,7 @@ module.exports = {
     return Comment.findById(req.params.id).then((comment) => {
       const authorized = new Authorizer(req.user, comment).destroy();
 
-      if(authorized) {
+      if (authorized) {
         comment.destroy();
         callback(null, comment);
       } else {
@@ -25,4 +23,4 @@ module.exports = {
       }
     });
   }
-}
+};

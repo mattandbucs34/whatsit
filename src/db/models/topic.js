@@ -1,5 +1,4 @@
-'use strict';
-module.exports = (sequelize, DataTypes) => {
+export default (sequelize, DataTypes) => {
   var Topic = sequelize.define('Topic', {
     title: {
       type: DataTypes.STRING,
@@ -13,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER
     }
   }, {});
-  Topic.associate = function(models) {
+  Topic.associate = function (models) {
     // associations can be defined here
     Topic.hasMany(models.Banner, {
       foreignKey: "topicId",

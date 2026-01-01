@@ -1,8 +1,8 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
 
-const topicController = require("../controllers/topicController");
-const validation = require("./validation-routes");
+import topicController from "../controllers/topicController";
+import validation from "./validation-routes";
 
 router.get("/topics", topicController.index);
 router.get("/topics/new", topicController.new);

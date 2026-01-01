@@ -1,5 +1,4 @@
-'use strict';
-module.exports = (sequelize, DataTypes) => {
+export default (sequelize, DataTypes) => {
   var Rule = sequelize.define('Rule', {
     description: DataTypes.STRING,
     topicId: {
@@ -12,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     }
   }, {});
-  Rule.associate = function(models) {
+  Rule.associate = function (models) {
     // associations can be defined here
     Rule.belongsTo(models.Topic, {
       foreignKey: "topicId",

@@ -1,30 +1,27 @@
-const favoriteQueries = require("../db/queries.favorites.js");
+import { createFavorite, deleteFavorite } from "../db/queries.favorites.js";
 
-module.exports = {
-  create(req, res, next) {
-    if(req.user) {
-      favoriteQueries.createFavorite(req, (err, favorite) => {
-        if(err) {
-          req.flash("error", err);
-        }
-      });
-    }else {
-      req.flash("notice", "You must be signed in to do that!")
-    }
-    res.redirect(req.headers.referer);
-  },
-
-  destroy(req, res, next) {
-    if(req.user) {
-      favoriteQueries.deleteFavorite(req, (err, favorite) => {
-        if(err) {
-          req.flash("error", err);
-        }
-        res.redirect(req.headers.referer);
-      });
-    }else {
-      req.flash("notice", "You must be signed in to do that!")
+export function create(req, res, next) {
+  if (req.user) {
+    createFavorite(req, (err, favorite) => {
+      if (err) {
+        req.flash("error", err);
+      }
+    });
+  } else {
+    req.flash("notice", "You must be signed in to do that!");
+  }
+  res.redirect(req.headers.referer);
+}
+export function destroy(req, res, next) {
+  if (req.user) {
+    deleteFavorite(req, (err, favorite) => {
+      if (err) {
+        req.flash("error", err);
+      }
       res.redirect(req.headers.referer);
-    }
+    });
+  } else {
+    req.flash("notice", "You must be signed in to do that!");
+    res.redirect(req.headers.referer);
   }
 }

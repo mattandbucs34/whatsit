@@ -1,5 +1,4 @@
-'use strict';
-module.exports = (sequelize, DataTypes) => {
+export default (sequelize, DataTypes) => {
   var Comment = sequelize.define('Comment', {
     body: {
       type: DataTypes.STRING,
@@ -14,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     }
   }, {});
-  Comment.associate = function(models) {
+  Comment.associate = function (models) {
     // associations can be defined here
     Comment.belongsTo(models.Post, {
       foreignKey: "postId",
@@ -31,10 +30,10 @@ module.exports = (sequelize, DataTypes) => {
         include: [{
           model: models.Post
         }],
-        where: {userId: userId},
+        where: { userId: userId },
         limit: 5,
         order: [["createdAt", "DESC"]]
-      }
+      };
     });
   };
 

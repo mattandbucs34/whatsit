@@ -1,41 +1,36 @@
-'use strict';
-
-const faker = require("faker");
+import { hacker } from "faker";
 
 let topics = [];
 
-for(let i = 1; i <= 15; i++) {
+for (let i = 1; i <= 15; i++) {
   topics.push({
-    title: faker.hacker.noun(),
-    description: faker.hacker.phrase(),
+    title: hacker.noun(),
+    description: hacker.phrase(),
     createdAt: new Date(),
     updatedAt: new Date()
   });
 }
 
-module.exports = {
-  up: (queryInterface, Sequelize) => {
-    /*
-      Add altering commands here.
-      Return a promise to correctly handle asynchronicity.
+export function up(queryInterface, Sequelize) {
+  /*
+    Add altering commands here.
+    Return a promise to correctly handle asynchronicity.
 
-      Example:
-      return queryInterface.bulkInsert('Person', [{
-        name: 'John Doe',
-        isBetaMember: false
-      }], {});
-    */
-    return queryInterface.bulkInsert("Topics", topics, {});
-  },
+    Example:
+    return queryInterface.bulkInsert('Person', [{
+      name: 'John Doe',
+      isBetaMember: false
+    }], {});
+  */
+  return queryInterface.bulkInsert("Topics", topics, {});
+}
+export function down(queryInterface, Sequelize) {
+  /*
+    Add reverting commands here.
+    Return a promise to correctly handle asynchronicity.
 
-  down: (queryInterface, Sequelize) => {
-    /*
-      Add reverting commands here.
-      Return a promise to correctly handle asynchronicity.
-
-      Example:
-      return queryInterface.bulkDelete('Person', null, {});
-    */
-    return queryInterface.bulkDelete("Topics", null, {});
-  }
-};
+    Example:
+    return queryInterface.bulkDelete('Person', null, {});
+  */
+  return queryInterface.bulkDelete("Topics", null, {});
+}

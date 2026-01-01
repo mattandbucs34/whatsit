@@ -1,6 +1,6 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const flairController = require("../controllers/flairController");
+import flairController from "../controllers/flairController";
 
 router.get("/flairs", flairController.index);
 router.get("/flairs/new", flairController.new);

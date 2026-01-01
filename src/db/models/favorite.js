@@ -1,5 +1,4 @@
-'use strict';
-module.exports = (sequelize, DataTypes) => {
+export default (sequelize, DataTypes) => {
   var Favorite = sequelize.define('Favorite', {
     postId: {
       type: DataTypes.INTEGER,
@@ -10,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     }
   }, {});
-  Favorite.associate = function(models) {
+  Favorite.associate = function (models) {
     // associations are be defined here
     Favorite.belongsTo(models.Post, {
       foreignKey: "postId",
@@ -27,10 +26,10 @@ module.exports = (sequelize, DataTypes) => {
         include: [{
           model: models.Post
         }],
-        where: {userId: userId},
+        where: { userId: userId },
         limit: 15,
         order: [["createdAt", "DESC"]]
-      }
+      };
     });
   };
   return Favorite;

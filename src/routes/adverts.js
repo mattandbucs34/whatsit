@@ -1,6 +1,6 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const advertController = require("../controllers/advertController");
+import advertController from "../controllers/advertController";
 
 router.get("/adverts", advertController.index);
 router.get("/adverts/new", advertController.new);

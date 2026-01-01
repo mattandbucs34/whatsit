@@ -1,7 +1,7 @@
-const passport = require("passport");
-const LocalStrategy = require("passport-local").Strategy;
-const User = require("../db/models").User;
-const authHelper = require("../auth/helpers");
+import passport from "passport";
+import LocalStrategy from "passport-local";
+import User from "../db/models";
+import authHelper from "../auth/helpers";
 
 module.exports = {
   init(app) {
@@ -12,13 +12,13 @@ module.exports = {
       usernameField: "email"
     }, (email, password, done) => {
       User.findOne({
-        where: {email}
+        where: { email }
       }).then((user) => {
-        if(!user || !authHelper.comparePass(password, user.password)) {
-          return done(null, false, {message: "Invalid email or password" });
+        if (!user || !authHelper.comparePass(password, user.password)) {
+          return done(null, false, { message: "Invalid email or password" });
         }
         return done(null, user);
-      })
+      });
     }));
 
     passport.serializeUser((user, callback) => {
@@ -33,4 +33,4 @@ module.exports = {
       });
     });
   }
-}
+};

@@ -1,4 +1,4 @@
-const Advert = require("./models").Advert;
+import Advert from "./models";
 
 module.exports = {
 
@@ -7,7 +7,7 @@ module.exports = {
       callback(null, adverts);
     }).catch((err) => {
       callback(err);
-    })
+    });
   },
 
   addAdvert(newAdvert, callback) {
@@ -15,46 +15,46 @@ module.exports = {
       title: newAdvert.title,
       description: newAdvert.description
     })
-    .then((advert) => {
-      callback(null, advert);
-    })
-    .catch((err) => {
-      callback(err);
-    })
+      .then((advert) => {
+        callback(null, advert);
+      })
+      .catch((err) => {
+        callback(err);
+      });
   },
 
-  getAdvert(id, callback){
+  getAdvert(id, callback) {
     return Advert.findById(id).then((advert) => {
       callback(null, advert);
     }).catch((err) => {
       callback(err);
-    })
+    });
   },
 
   deleteAdvert(id, callback) {
     return Advert.destroy({
-      where: {id}
+      where: { id }
     }).then((advert) => {
       callback(null, advert);
     }).catch((err) => {
       callback(err);
-    })
+    });
   },
 
   updateAdvert(id, updatedAdvert, callback) {
     return Advert.findById(id)
-    .then((advert) => {
-      if(!advert) {
-        return callback("Topic Not Found");
-      }
+      .then((advert) => {
+        if (!advert) {
+          return callback("Topic Not Found");
+        }
 
-      advert.update(updatedAdvert, {
-        fields: Object.keys(updatedAdvert)
-      }).then(() => {
-        callback(null, advert);
-      }).catch((err) => {
-        callback(err);
+        advert.update(updatedAdvert, {
+          fields: Object.keys(updatedAdvert)
+        }).then(() => {
+          callback(null, advert);
+        }).catch((err) => {
+          callback(err);
+        });
       });
-    });
   }
-}
+};

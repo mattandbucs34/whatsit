@@ -1,43 +1,41 @@
-const voteQueries = require("../db/queries.votes.js");
+import { createVote } from "../db/queries.votes.js";
 
-module.exports = {
-  upvote(req, res, next) {
-    if(req.user) {
-      voteQueries.createVote(req, 1, (err, vote) => {
-        if(err) {
-          req.flash("error", err);
-        }
-        res.redirect(req.headers.referer);
-      });
-    } else {
-      req.flash("notice", "You must be signed in to do that!");
+export function upvote(req, res, next) {
+  if (req.user) {
+    createVote(req, 1, (err, vote) => {
+      if (err) {
+        req.flash("error", err);
+      }
       res.redirect(req.headers.referer);
-    }
-  },
-  downvote(req, res, next) {
-    if(req.user) {
-      voteQueries.createVote(req, -1, (err, vote) => {
-        if(err) {
-          req.flash("error", err);
-        }
-        res.redirect(req.headers.referer);
-      });
-    } else {
-      req.flash("notice", "You must be signed in to do that!");
+    });
+  } else {
+    req.flash("notice", "You must be signed in to do that!");
+    res.redirect(req.headers.referer);
+  }
+}
+export function downvote(req, res, next) {
+  if (req.user) {
+    createVote(req, -1, (err, vote) => {
+      if (err) {
+        req.flash("error", err);
+      }
       res.redirect(req.headers.referer);
-    }
-  },
-  mockvote(req, res, next) {
-    if(req.user) {
-      voteQueries.createVote(req, 2, (err, vote) => {
-        if(err) {
-          req.flash("error", err);
-        }
-        res.redirect(req.headers.referer);
-      });
-    } else {
-      req.flash("notice", "You must be signed in to do that!");
+    });
+  } else {
+    req.flash("notice", "You must be signed in to do that!");
+    res.redirect(req.headers.referer);
+  }
+}
+export function mockvote(req, res, next) {
+  if (req.user) {
+    createVote(req, 2, (err, vote) => {
+      if (err) {
+        req.flash("error", err);
+      }
       res.redirect(req.headers.referer);
-    }
+    });
+  } else {
+    req.flash("notice", "You must be signed in to do that!");
+    res.redirect(req.headers.referer);
   }
 }

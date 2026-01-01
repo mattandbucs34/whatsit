@@ -1,26 +1,21 @@
-'use strict';
+export function up(queryInterface, Sequelize) {
 
-module.exports = {
-  up: (queryInterface, Sequelize) => {
-    
-    return queryInterface.addColumn(
-      "Posts",
-      "userId",
-      {
-        type: Sequelize.INTEGER,
-        onDelete: "CASCADE",
-        allowNull: false,
-        references: {
-          model: "Users",
-          key: "id",
-          as: "userId"
-        },
-      }
-    );
-  },
+  return queryInterface.addColumn(
+    "Posts",
+    "userId",
+    {
+      type: Sequelize.INTEGER,
+      onDelete: "CASCADE",
+      allowNull: false,
+      references: {
+        model: "Users",
+        key: "id",
+        as: "userId"
+      },
+    }
+  );
+}
+export function down(queryInterface, Sequelize) {
 
-  down: (queryInterface, Sequelize) => {
-    
-    return queryInterface.removeColumn("Posts", "userId");
-  }
-};
+  return queryInterface.removeColumn("Posts", "userId");
+}

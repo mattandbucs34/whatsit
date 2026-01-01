@@ -1,36 +1,33 @@
-const commentQueries = require("../db/queries.comments.js");
-const Authorizer = require("../policies/comment-policy.js");
+import { createComment, deleteComment } from "../db/queries.comments.js";
+import Authorizer from "../policies/comment-policy.js";
 
-module.exports = {
-  create(req, res, next) {
-    const authorized = new Authorizer(req.user).create();
+export function create(req, res, next) {
+  const authorized = new Authorizer(req.user).create();
 
-    if(authorized) {
-      let newComment = {
-        body: req.body.body,
-        userId: req.user.id, 
-        postId: req.params.postId
-      };
+  if (authorized) {
+    let newComment = {
+      body: req.body.body,
+      userId: req.user.id,
+      postId: req.params.postId
+    };
 
-      commentQueries.createComment(newComment, (err, comment) => {
-        if(err) {
-          req.flash("error", err);
-        }
-        res.redirect(req.headers.referer);
-      });
-    } else {
-      req.flash("notice", "You must be signed in to do that!");
-      req.redirect("/users/sign_in");
-    }
-  },
-
-  destroy(req, res, next) {
-    commentQueries.deleteComment(req, (err, comment) => {
-      if(err) {
-        res.redirect(err, req.headers.referer);
-      } else {
-        res.redirect(req.headers.referer);
+    createComment(newComment, (err, comment) => {
+      if (err) {
+        req.flash("error", err);
       }
+      res.redirect(req.headers.referer);
     });
+  } else {
+    req.flash("notice", "You must be signed in to do that!");
+    req.redirect("/users/sign_in");
   }
+}
+export function destroy(req, res, next) {
+  deleteComment(req, (err, comment) => {
+    if (err) {
+      res.redirect(err, req.headers.referer);
+    } else {
+      res.redirect(req.headers.referer);
+    }
+  });
 }

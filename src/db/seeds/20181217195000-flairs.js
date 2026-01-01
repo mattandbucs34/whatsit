@@ -1,13 +1,11 @@
-'use strict';
-
-const faker = require("faker");
+import { company, commerce } from "faker";
 
 let flairs = [];
 
-for(let i = 0; i < 15; i++) {
+for (let i = 0; i < 15; i++) {
   flairs.push({
-    name: faker.company.catchPhrase(),
-    color: faker.commerce.color(),
+    name: company.catchPhrase(),
+    color: commerce.color(),
     createdAt: new Date(),
     updatedAt: new Date()
   });

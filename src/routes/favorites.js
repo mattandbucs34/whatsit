@@ -1,6 +1,6 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const favoriteController = require("../controllers/favoriteController");
+import favoriteController from "../controllers/favoriteController";
 
 router.post("/topics/:topicId/posts/:postId/favorites/create", favoriteController.create);
 router.post("/topics/:topicId/posts/:postId/favorites/:id/destroy", favoriteController.destroy);

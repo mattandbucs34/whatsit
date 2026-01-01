@@ -1,8 +1,8 @@
-const User = require("./models").User;
-const Post = require("./models").Post;
-const Comment = require("./models").Comment;
-const Favorite = require("./models").Favorite;
-const bcrypt = require("bcryptjs");
+import User from "./models";
+import Post from "./models";
+import Comment from "./models";
+import Favorite from "./models";
+import bcrypt from "bcrypt";
 
 module.exports = {
   createUser(newUser, callback) {
@@ -16,31 +16,31 @@ module.exports = {
       callback(null, user);
     }).catch((err) => {
       callback(err);
-    })
+    });
   },
 
   getUser(id, callback) {
     let result = {};
     User.findById(id).then((user) => {
-      if(!user) {
+      if (!user) {
         callback(404);
-      }else {
+      } else {
         result["user"] = user;
-        Post.scope({method: ["lastFiveFor", id]}).all().then((posts) => {
+        Post.scope({ method: ["lastFiveFor", id] }).all().then((posts) => {
           result["posts"] = posts;
 
-          Comment.scope({method: ["lastFiveFor", id]}).all().then((comments) => {
+          Comment.scope({ method: ["lastFiveFor", id] }).all().then((comments) => {
             result["comments"] = comments;
 
-            Favorite.scope({method: ["allFavsFor", id]}).all().then((favorites) => {
+            Favorite.scope({ method: ["allFavsFor", id] }).all().then((favorites) => {
               result["favorites"] = favorites;
               callback(null, result);
-              }).catch((err) => {
-                callback(err);
+            }).catch((err) => {
+              callback(err);
             });
           });
         });
       }
     });
   }
-}
+};

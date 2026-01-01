@@ -1,19 +1,18 @@
-const Post = require("./models").Post;
-const Topic = require("./models").Topic;
-const Comment = require("./models").Comment;
-const User = require("./models").User;
-const Vote = require("./models").Vote;
-const Favorite = require("./models").Favorite;
-const Authorizer = require("../policies/post");
+import Post from "./models";
+import Comment from "./models";
+import User from "./models";
+import Vote from "./models";
+import Favorite from "./models";
+import Authorizer from "../policies/post";
 
 module.exports = {
   addPost(newPost, callback) {
     return Post.create(newPost)
-    .then((post) => {
-      callback(null,post);
-    }).catch((err) => {
-      callback(err);
-    })
+      .then((post) => {
+        callback(null, post);
+      }).catch((err) => {
+        callback(err);
+      });
   },
 
   getPost(req, callback) {
@@ -32,50 +31,50 @@ module.exports = {
         as: "favorites"
       }]
     })
-    .then((post) => {
-      callback(null, post);
-    }).catch((err) => {
-      callback(err);
-    })
+      .then((post) => {
+        callback(null, post);
+      }).catch((err) => {
+        callback(err);
+      });
   },
-  
+
   deletePost(req, callback) {
     return Post.findById(req.params.id).then((post) => {
       const authorized = new Authorizer(req.user, post).destroy();
-      if(authorized) {
+      if (authorized) {
         post.destroy().then((res) => {
           callback(null, post);
         });
-      }else {
+      } else {
         req.flash("notice", "You are not authorized to do that!");
         callback(401);
       }
     }).catch((err) => {
       callback(err);
-    });      
+    });
   },
 
   updatePost(req, updatePost, callback) {
     return Post.findById(req.params.id)
-    .then((post) => {
-      if(!post) {
-        return callback("Post not found");
-      }
+      .then((post) => {
+        if (!post) {
+          return callback("Post not found");
+        }
 
-      const authorized = new Authorizer(req.user, post).update();
+        const authorized = new Authorizer(req.user, post).update();
 
-      if(authorized) {
-        post.update(updatePost, {
-          fields: Object.keys(updatePost)
-        }).then(() => {
-          callback(null, post);
-        }).catch((err) => {
-          callback(err);
-        });
-      }else {
-        req.flash("notice", "You are not authorized to do that!");
-        callback("Forbidden");
-      }     
-    });
+        if (authorized) {
+          post.update(updatePost, {
+            fields: Object.keys(updatePost)
+          }).then(() => {
+            callback(null, post);
+          }).catch((err) => {
+            callback(err);
+          });
+        } else {
+          req.flash("notice", "You are not authorized to do that!");
+          callback("Forbidden");
+        }
+      });
   }
-}
+};

@@ -1,6 +1,6 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const staticController = require("../controllers/staticController");
+import staticController from "../controllers/staticController";
 
 /* router.get("/", (req, res, next) => {
   res.send("Welcome to Bloccit");

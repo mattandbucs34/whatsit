@@ -1,8 +1,8 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const postController = require("../controllers/postController");
-const validation = require("./validation-routes");
-const helper = require("../auth/helpers");
+import postController from "../controllers/postController";
+import validation from "./validation-routes";
+import helper from "../auth/helpers";
 
 router.get("/topics/:topicId/posts/new", postController.new);
 router.get("/topics/:topicId/posts/:id", postController.show);

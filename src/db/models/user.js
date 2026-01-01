@@ -1,5 +1,4 @@
-'use strict';
-module.exports = (sequelize, DataTypes) => {
+export default (sequelize, DataTypes) => {
   var User = sequelize.define('User', {
     email: {
       type: DataTypes.STRING,
@@ -19,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: "member"
     }
   }, {});
-  User.associate = function(models) {
+  User.associate = function (models) {
     // associations are be defined here
     User.hasMany(models.Post, {
       foreignKey: "userId",
@@ -42,9 +41,9 @@ module.exports = (sequelize, DataTypes) => {
     });
   };
 
-  User.prototype.isAdmin = function() {
+  User.prototype.isAdmin = function () {
     return this.role === "admin";
   };
-  
+
   return User;
 };

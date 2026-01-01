@@ -1,8 +1,5 @@
-const Comment = require("./models").Comment;
-const Post = require("./models").Post;
-const User = require("./models").User;
-const Favorite = require("./models").Favorite;
-const Authorizer = require("../policies/favorite");
+import Favorite from "./models";
+import Authorizer from "../policies/favorite";
 
 module.exports = {
   createFavorite(req, callback) {
@@ -20,19 +17,19 @@ module.exports = {
     const id = req.params.id;
 
     return Favorite.findById(id).then((favorite) => {
-      if(!favorite) {
-        return callback ("Favorite not found!");
+      if (!favorite) {
+        return callback("Favorite not found!");
       }
 
       const authorized = new Authorizer(req.user, favorite).destroy();
-      
-      if(authorized) {
-        Favorite.destroy({where: {id}}).then((deletedRecordsCount) => {
+
+      if (authorized) {
+        Favorite.destroy({ where: { id } }).then((deletedRecordsCount) => {
           callback(null, deletedRecordsCount);
         }).catch((err) => {
           callback(err);
         });
-      }else {
+      } else {
         req.flash("notice", "You are not authorized to do that!");
         callback(401);
       }
@@ -40,4 +37,4 @@ module.exports = {
       callback(err);
     });
   }
-}
+};

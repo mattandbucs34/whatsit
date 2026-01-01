@@ -1,9 +1,9 @@
-const Flair = require("./models").Flair;
+const Flair = require("./models").default.Flair;
 
 module.exports = {
   getAllFlairs(callback) {
     return Flair.all().then((flairs) => {
-      callback(null,flairs);
+      callback(null, flairs);
     }).catch((err) => {
       callback(err);
     });
@@ -14,17 +14,17 @@ module.exports = {
       name: newFlair.name,
       color: newFlair.color
     }).then((flair) => {
-      callback(null,flair);
+      callback(null, flair);
     }).catch((err) => {
       callback(err);
     });
   },
 
-  getFlair(name, callback){
+  getFlair(name, callback) {
     return Flair.findOne({
-      where: {name: name}
+      where: { name: name }
     }).then((flair) => {
-      callback(null,flair);
+      callback(null, flair);
     }).catch((err) => {
       callback(err);
     });
@@ -32,7 +32,7 @@ module.exports = {
 
   deleteFlair(name, callback) {
     return Flair.destroy({
-      where: {name} 
+      where: { name }
     }).then((flair) => {
       callback(null, flair);
     }).catch((err) => {
@@ -42,9 +42,9 @@ module.exports = {
 
   updateFlair(name, updatedFlair, callback) {
     return Flair.findOne({
-      where: {name}
+      where: { name }
     }).then((flair) => {
-      if(!flair){
+      if (!flair) {
         return callback("Flair not found");
       }
 
@@ -57,4 +57,4 @@ module.exports = {
       });
     });
   }
-}
+};

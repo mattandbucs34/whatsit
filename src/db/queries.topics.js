@@ -1,16 +1,15 @@
-const Topic = require("./models").Topic;
-const Post = require("./models").Post;
-const Flair = require("./models").Flair;
-const Authorizer = require("../policies/topic")
+import Topic from "./models";
+import Post from "./models";
+import Authorizer from "../policies/topic";
 
 module.exports = {
-  
+
   getAllTopics(callback) {
     return Topic.all().then((topics) => {
       callback(null, topics);
     }).catch((err) => {
       callback(err);
-    })
+    });
   },
 
   addTopic(newTopic, callback) {
@@ -18,12 +17,12 @@ module.exports = {
       title: newTopic.title,
       description: newTopic.description
     })
-    .then((topic) => {
-      callback(null, topic);
-    })
-    .catch((err) => {
-      callback(err);
-    })
+      .then((topic) => {
+        callback(null, topic);
+      })
+      .catch((err) => {
+        callback(err);
+      });
   },
 
   getTopic(id, callback) {
@@ -33,23 +32,23 @@ module.exports = {
         as: "posts"
       }]
     })
-    .then((topic) => {
-      callback(null, topic);
-    })
-    .catch((err) => {
-      callback(err);
-    })
+      .then((topic) => {
+        callback(null, topic);
+      })
+      .catch((err) => {
+        callback(err);
+      });
   },
 
   deleteTopic(req, callback) {
     return Topic.findById(req.params.id).then((topic) => {
       const authorized = new Authorizer(req.user, topic).destroy();
 
-      if(authorized) {
+      if (authorized) {
         topic.destroy().then((res) => {
           callback(null, topic);
         });
-      }else {
+      } else {
         req.flash("notice", "You are not authorized to do that.");
         callback(401);
       }
@@ -60,13 +59,13 @@ module.exports = {
 
   updateTopic(req, updatedTopic, callback) {
     return Topic.findById(req.params.id).then((topic) => {
-      if(!topic) {
+      if (!topic) {
         return callback("Topic not found");
       }
 
       const authorized = new Authorizer(req.user, topic).update();
 
-      if(authorized) {
+      if (authorized) {
         topic.update(updatedTopic, {
           fields: Object.keys(updatedTopic)
         }).then(() => {
@@ -74,10 +73,10 @@ module.exports = {
         }).catch((err) => {
           callback(err);
         });
-      }else {
+      } else {
         req.flash("notice", "You are not authorized to do that.");
         callback("Forbidden");
       }
     });
   }
-}
+};

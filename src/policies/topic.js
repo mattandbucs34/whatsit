@@ -1,6 +1,6 @@
-const ApplicationPolicy = require("./application");
+import ApplicationPolicy from "./application";
 
-module.exports = class TopicPolicy extends ApplicationPolicy {
+export default class TopicPolicy extends ApplicationPolicy {
   new() {
     return this._isAdmin();
   }
@@ -20,4 +20,4 @@ module.exports = class TopicPolicy extends ApplicationPolicy {
   destroy() {
     return this.update();
   }
-}
+};
