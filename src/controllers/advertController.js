@@ -9,10 +9,10 @@ export function index(req, res, next) {
     }
   });
 }
-export function new (req, res, next) {
+export function newAdvert(req, res, next) {
   res.render("adverts/new");
 }
-export function create(req, res, next) {
+export function createAdvert(req, res, next) {
   let newAdvert = {
     title: req.body.title,
     description: req.body.description
@@ -26,7 +26,7 @@ export function create(req, res, next) {
     }
   });
 }
-export function show(req, res, next) {
+export function showAdvert(req, res, next) {
   getAdvert(req.params.id, (err, advert) => {
     if (err || advert == null) {
       res.redirect(404, "/");
@@ -35,7 +35,7 @@ export function show(req, res, next) {
     }
   });
 }
-export function destroy(req, res, next) {
+export function destroyAdvert(req, res, next) {
   deleteAdvert(req.params.id, (err, advert) => {
     if (err) {
       res.redirect(500, `/adverts/${advert.id}`);
@@ -44,7 +44,7 @@ export function destroy(req, res, next) {
     }
   });
 }
-export function edit(req, res, next) {
+export function editAdvert(req, res, next) {
   getAdvert(req.params.id, (err, advert) => {
     if (err || advert == null) {
       res.redirect(404, "/");
@@ -53,7 +53,7 @@ export function edit(req, res, next) {
     }
   });
 }
-export function update(req, res, next) {
+export function updateAdvert(req, res, next) {
   updateAdvert(req.params.id, req.body, (err, advert) => {
     if (err || advert == null) {
       res.redirect(404, `/adverts/${req.params.id}/edit`);

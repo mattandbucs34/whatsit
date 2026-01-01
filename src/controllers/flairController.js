@@ -9,10 +9,10 @@ export function index(req, res, next) {
     }
   });
 }
-export function new (req, res, next) {
+export function newFlair(req, res, next) {
   res.render("flairs/new");
 }
-export function create(req, res, next) {
+export function createFlair(req, res, next) {
   let newFlair = {
     name: req.body.name,
     color: req.body.color
@@ -25,7 +25,7 @@ export function create(req, res, next) {
     }
   });
 }
-export function show(req, res, next) {
+export function showFlair(req, res, next) {
   getFlair(req.params.name, (err, flair) => {
     if (err || flair == null) {
       res.redirect(404, "/");
@@ -34,7 +34,7 @@ export function show(req, res, next) {
     }
   });
 }
-export function destroy(req, res, next) {
+export function destroyFlair(req, res, next) {
   deleteFlair(req.params.name, (err, flair) => {
     if (err) {
       res.redirect(500, `/flairs/${req.params.name}`);
@@ -43,7 +43,7 @@ export function destroy(req, res, next) {
     }
   });
 }
-export function edit(req, res, next) {
+export function editFlair(req, res, next) {
   getFlair(req.params.name, (err, flair) => {
     if (err || flair == null) {
       res.redirect(404, "/");
@@ -52,7 +52,7 @@ export function edit(req, res, next) {
     }
   });
 }
-export function update(req, res, next) {
+export function updateFlair(req, res, next) {
   updateFlair(req.params.name, req.body, (err, flair) => {
     if (err || flair == null) {
       res.redirect(404, `/flairs/${req.params.name}/edit`);

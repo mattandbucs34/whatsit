@@ -9,7 +9,7 @@ export function index(req, res, next) {
     }
   });
 }
-export function new (req, res, next) {
+export function newTopic(req, res, next) {
   const authorized = new Authorizer(req.user).new();
 
   if (authorized) {

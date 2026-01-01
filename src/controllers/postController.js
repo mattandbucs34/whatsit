@@ -1,7 +1,7 @@
 import { addPost, getPost, deletePost, updatePost } from "../db/queries.posts.js";
 import Authorizer from "../policies/post";
 
-export function new (req, res, next) {
+export function newPost(req, res, next) {
   const authorized = new Authorizer(req.user).new();
   if (authorized) {
     res.render("posts/new", { topicId: req.params.topicId });
@@ -10,7 +10,7 @@ export function new (req, res, next) {
     res.redirect(`/topics/${req.params.topicId}/posts/${req.params.id}/new`);
   }
 }
-export function create(req, res, next) {
+export function createPost(req, res, next) {
   const authorized = new Authorizer(req.user).create();
   if (authorized) {
     let newPost = {
@@ -31,7 +31,7 @@ export function create(req, res, next) {
     res.redirect(`/topics/${req.params.topicId}`);
   }
 }
-export function show(req, res, next) {
+export function showPost(req, res, next) {
   getPost(req, (err, post) => {
     if (err || post == null) {
       res.redirect(404, "/");
@@ -40,7 +40,7 @@ export function show(req, res, next) {
     }
   });
 }
-export function destroy(req, res, next) {
+export function destroyPost(req, res, next) {
   deletePost(req, (err, post) => {
     if (err) {
       res.redirect(302, `/topics/${req.params.topicId}/posts/${req.params.id}`);
@@ -49,7 +49,7 @@ export function destroy(req, res, next) {
     }
   });
 }
-export function edit(req, res, next) {
+export function editPost(req, res, next) {
   getPost(req, (err, post) => {
     if (err || post == null) {
       res.redirect(404, "/");
@@ -64,7 +64,7 @@ export function edit(req, res, next) {
     }
   });
 }
-export function update(req, res, next) {
+export function updatePost(req, res, next) {
   updatePost(req.params.id, req.body, (err, post) => {
     if (err || post == null) {
       res.redirect(401, `/topics/${req.params.topicId}/posts/${req.params.id}/edit`);
