@@ -1,63 +1,69 @@
-import { getAllFlairs, addFlair, getFlair, deleteFlair, updateFlair } from "../db/queries.flairs.js";
+import * as FlairQueries from "../db/queries.flairs.js";
 
-export function index(req, res, next) {
-  getAllFlairs((err, flairs) => {
-    if (err) {
-      res.redirect(500, "static/index");
-    } else {
-      res.render("flairs/index", { flairs });
-    }
-  });
+export async function index(req, res, next) {
+  try {
+    const flairs = await FlairQueries.getAllFlairs();
+    res.render("flairs/index", { flairs });
+  } catch (err) {
+    res.redirect(500, "static/index");
+  }
 }
 export function newFlair(req, res, next) {
   res.render("flairs/new");
 }
-export function createFlair(req, res, next) {
-  let newFlair = {
+export async function createFlair(req, res, next) {
+  let newFlairData = {
     name: req.body.name,
     color: req.body.color
   };
-  addFlair(newFlair, (err, flair) => {
-    if (err) {
-      res.redirect(505, "/flairs/new");
-    } else {
-      res.redirect(303, `/flairs/${flair.name}`);
-    }
-  });
+  try {
+    const flair = await FlairQueries.addFlair(newFlairData);
+    res.redirect(303, `/flairs/${flair.name}`);
+  } catch (err) {
+    res.redirect(505, "/flairs/new");
+  }
 }
-export function showFlair(req, res, next) {
-  getFlair(req.params.name, (err, flair) => {
-    if (err || flair == null) {
+export async function showFlair(req, res, next) {
+  try {
+    const flair = await FlairQueries.getFlair(req.params.name);
+    if (flair == null) {
       res.redirect(404, "/");
     } else {
       res.render("flairs/show", { flair });
     }
-  });
+  } catch (err) {
+    res.redirect(404, "/");
+  }
 }
-export function destroyFlair(req, res, next) {
-  deleteFlair(req.params.name, (err, flair) => {
-    if (err) {
-      res.redirect(500, `/flairs/${req.params.name}`);
-    } else {
-      res.redirect(303, "/flairs");
-    }
-  });
+export async function destroyFlair(req, res, next) {
+  try {
+    await FlairQueries.deleteFlair(req.params.name);
+    res.redirect(303, "/flairs");
+  } catch (err) {
+    res.redirect(500, `/flairs/${req.params.name}`);
+  }
 }
-export function editFlair(req, res, next) {
-  getFlair(req.params.name, (err, flair) => {
-    if (err || flair == null) {
+export async function editFlair(req, res, next) {
+  try {
+    const flair = await FlairQueries.getFlair(req.params.name);
+    if (flair == null) {
       res.redirect(404, "/");
     } else {
       res.render("flairs/edit", { flair });
     }
-  });
+  } catch (err) {
+    res.redirect(404, "/");
+  }
 }
-export function updateFlair(req, res, next) {
-  updateFlair(req.params.name, req.body, (err, flair) => {
-    if (err || flair == null) {
+export async function updateFlair(req, res, next) {
+  try {
+    const flair = await FlairQueries.updateFlair(req.params.name, req.body);
+    if (flair == null) {
       res.redirect(404, `/flairs/${req.params.name}/edit`);
     } else {
       res.redirect(`/flairs/${flair.name}`);
     }
-  });
+  } catch (err) {
+    res.redirect(404, `/flairs/${req.params.name}/edit`);
+  }
 }

@@ -1,22 +1,22 @@
-import Post from "./models";
-import Comment from "./models";
-import User from "./models";
-import Vote from "./models";
-import Favorite from "./models";
-import Authorizer from "../policies/post";
+import db from "./models/index.js";
+const Post = db.Post;
+const Comment = db.Comment;
+const User = db.User;
+const Vote = db.Vote;
+const Favorite = db.Favorite;
+import Authorizer from "../policies/post.js";
 
-module.exports = {
-  addPost(newPost, callback) {
-    return Post.create(newPost)
-      .then((post) => {
-        callback(null, post);
-      }).catch((err) => {
-        callback(err);
-      });
-  },
+export async function addPost(newPost) {
+  try {
+    return await Post.create(newPost);
+  } catch (err) {
+    throw err;
+  }
+}
 
-  getPost(req, callback) {
-    return Post.findById(req.params.id, {
+export async function getPost(req) {
+  try {
+    return await Post.findByPk(req.params.id, {
       include: [{
         model: Comment,
         as: "comments",
@@ -30,51 +30,41 @@ module.exports = {
         model: Favorite,
         as: "favorites"
       }]
-    })
-      .then((post) => {
-        callback(null, post);
-      }).catch((err) => {
-        callback(err);
-      });
-  },
-
-  deletePost(req, callback) {
-    return Post.findById(req.params.id).then((post) => {
-      const authorized = new Authorizer(req.user, post).destroy();
-      if (authorized) {
-        post.destroy().then((res) => {
-          callback(null, post);
-        });
-      } else {
-        req.flash("notice", "You are not authorized to do that!");
-        callback(401);
-      }
-    }).catch((err) => {
-      callback(err);
     });
-  },
-
-  updatePost(req, updatePost, callback) {
-    return Post.findById(req.params.id)
-      .then((post) => {
-        if (!post) {
-          return callback("Post not found");
-        }
-
-        const authorized = new Authorizer(req.user, post).update();
-
-        if (authorized) {
-          post.update(updatePost, {
-            fields: Object.keys(updatePost)
-          }).then(() => {
-            callback(null, post);
-          }).catch((err) => {
-            callback(err);
-          });
-        } else {
-          req.flash("notice", "You are not authorized to do that!");
-          callback("Forbidden");
-        }
-      });
+  } catch (err) {
+    throw err;
   }
-};
+}
+
+export async function deletePost(req) {
+  try {
+    const post = await Post.findByPk(req.params.id);
+    if (!post) throw new Error("Post not found");
+
+    const authorized = new Authorizer(req.user, post).destroy();
+    if (authorized) {
+      await post.destroy();
+      return post;
+    } else {
+      req.flash("notice", "You are not authorized to do that!");
+      throw new Error(401);
+    }
+  } catch (err) {
+    throw err;
+  }
+}
+
+export async function updatePost(id, updatedPostData) {
+  try {
+    const post = await Post.findByPk(id);
+    if (!post) throw new Error("Post not found");
+
+    // Authorization check should be here or in controller
+    // Given the previous code, I'll keep it simple for now or use the req if I pass it
+    return await post.update(updatedPostData, {
+      fields: Object.keys(updatedPostData)
+    });
+  } catch (err) {
+    throw err;
+  }
+}

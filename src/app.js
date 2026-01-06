@@ -1,13 +1,9 @@
 import express from "express";
 const app = express();
-import appConfig from "./config/main-config.js";
-import routeConfig from "./config/route-config.js";
+import { init as initAppConfig } from "./config/main-config.js";
+import { init as initRouteConfig } from "./config/route-config.js";
 
-/* app.use("/", (req, res, next) => {
-  res.send("Welcome to Bloccit")
-}); */
-
-appConfig.init(app, express);
-routeConfig.init(app);
+initAppConfig(app, express);
+initRouteConfig(app);
 
 export default app;

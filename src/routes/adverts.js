@@ -1,14 +1,14 @@
 import express from "express";
 const router = express.Router();
-import advertController from "../controllers/advertController";
+import * as advertController from "../controllers/advertController.js";
 
 router.get("/adverts", advertController.index);
-router.get("/adverts/new", advertController.new);
-router.get("/adverts/:id", advertController.show);
-router.get("/adverts/:id/edit", advertController.edit);
+router.get("/adverts/new", advertController.newAdvert);
+router.get("/adverts/:id", advertController.showAdvert);
+router.get("/adverts/:id/edit", advertController.editAdvert);
 
-router.post("/adverts/create", advertController.create);
-router.post("/adverts/:id/destroy", advertController.destroy);
-router.post("/adverts/:id/update", advertController.update);
+router.post("/adverts/create", advertController.createAdvert);
+router.post("/adverts/:id/destroy", advertController.destroyAdvert);
+router.post("/adverts/:id/update", advertController.updateAdvert);
 
-module.exports = router;
+export default router;

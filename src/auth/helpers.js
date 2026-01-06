@@ -1,4 +1,5 @@
-import { compareSync } from "bcrypt";
+import bcryptjs from "bcryptjs";
+const { compareSync } = bcryptjs;
 
 export function ensureAuthenticated(req, res, next) {
   if (!req.user) {

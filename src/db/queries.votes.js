@@ -1,31 +1,26 @@
-import Vote from "./models";
+import db from "./models/index.js";
+const Vote = db.Vote;
 
-module.exports = {
-  createVote(req, val, callback) {
-    return Vote.findOne({
+export async function createVote(req, val) {
+  try {
+    const vote = await Vote.findOne({
       where: {
         postId: req.params.postId,
         userId: req.user.id
       }
-    }).then((vote) => {
-      if (vote) {
-        vote.value = val;
-        vote.save().then((vote) => {
-          callback(null, vote);
-        }).catch((err) => {
-          callback(err);
-        });
-      } else {
-        Vote.create({
-          value: val,
-          postId: req.params.postId,
-          userId: req.user.id
-        }).then((vote) => {
-          callback(null, vote);
-        }).catch((err) => {
-          callback(err);
-        });
-      }
     });
+
+    if (vote) {
+      vote.value = val;
+      return await vote.save();
+    } else {
+      return await Vote.create({
+        value: val,
+        postId: req.params.postId,
+        userId: req.user.id
+      });
+    }
+  } catch (err) {
+    throw err;
   }
-};
+}

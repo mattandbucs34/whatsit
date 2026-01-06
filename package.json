@@ -1,5 +1,5 @@
 {
-  "name": "bloccit",
+  "name": "whatsit",
   "version": "1.0.0",
   "description": "A Reddit-like application for users to discuss and share content",
   "engines": {
@@ -29,6 +29,7 @@
     "express-flash": "0.0.2",
     "express-session": "^1.15.6",
     "express-validator": "^7.3.1",
+    "helmet": "^8.1.0",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
     "pg": "^8.16.3",

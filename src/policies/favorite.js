@@ -1,4 +1,4 @@
-import ApplicationPolicy from "./application";
+import ApplicationPolicy from "./application.js";
 
 export default class FavoritePolicy extends ApplicationPolicy {
   destroy() {

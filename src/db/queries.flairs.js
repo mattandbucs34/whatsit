@@ -1,60 +1,58 @@
-const Flair = require("./models").default.Flair;
+import db from "./models/index.js";
+const Flair = db.Flair;
 
-module.exports = {
-  getAllFlairs(callback) {
-    return Flair.all().then((flairs) => {
-      callback(null, flairs);
-    }).catch((err) => {
-      callback(err);
-    });
-  },
+export async function getAllFlairs() {
+  try {
+    return await Flair.findAll();
+  } catch (err) {
+    throw err;
+  }
+}
 
-  addFlair(newFlair, callback) {
-    return Flair.create({
+export async function addFlair(newFlair) {
+  try {
+    return await Flair.create({
       name: newFlair.name,
       color: newFlair.color
-    }).then((flair) => {
-      callback(null, flair);
-    }).catch((err) => {
-      callback(err);
     });
-  },
-
-  getFlair(name, callback) {
-    return Flair.findOne({
-      where: { name: name }
-    }).then((flair) => {
-      callback(null, flair);
-    }).catch((err) => {
-      callback(err);
-    });
-  },
-
-  deleteFlair(name, callback) {
-    return Flair.destroy({
-      where: { name }
-    }).then((flair) => {
-      callback(null, flair);
-    }).catch((err) => {
-      callback(err);
-    });
-  },
-
-  updateFlair(name, updatedFlair, callback) {
-    return Flair.findOne({
-      where: { name }
-    }).then((flair) => {
-      if (!flair) {
-        return callback("Flair not found");
-      }
-
-      flair.update(updatedFlair, {
-        fields: Object.keys(updatedFlair)
-      }).then(() => {
-        callback(null, flair);
-      }).catch((err) => {
-        callback(err);
-      });
-    });
+  } catch (err) {
+    throw err;
   }
-};
+}
+
+export async function getFlair(name) {
+  try {
+    return await Flair.findOne({
+      where: { name: name }
+    });
+  } catch (err) {
+    throw err;
+  }
+}
+
+export async function deleteFlair(name) {
+  try {
+    return await Flair.destroy({
+      where: { name }
+    });
+  } catch (err) {
+    throw err;
+  }
+}
+
+export async function updateFlair(name, updatedFlair) {
+  try {
+    const flair = await Flair.findOne({
+      where: { name }
+    });
+    if (!flair) {
+      throw new Error("Flair not found");
+    }
+
+    return await flair.update(updatedFlair, {
+      fields: Object.keys(updatedFlair)
+    });
+  } catch (err) {
+    throw err;
+  }
+}

@@ -1,13 +1,12 @@
 import { getAllTopics, addTopic, getTopic, deleteTopic, updateTopic } from "../db/queries.topics.js";
-import Authorizer from "../policies/topic";
-export function index(req, res, next) {
-  getAllTopics((err, topics) => {
-    if (err) {
-      res.redirect(500, "static/index");
-    } else {
-      res.render("topics/index", { topics });
-    }
-  });
+import Authorizer from "../policies/topic.js";
+export async function index(req, res, next) {
+  try {
+    const topics = await getAllTopics();
+    res.render("topics/index", { topics });
+  } catch (err) {
+    res.redirect(500, "static/index");
+  }
 }
 export function newTopic(req, res, next) {
   const authorized = new Authorizer(req.user).new();
@@ -19,38 +18,41 @@ export function newTopic(req, res, next) {
     res.redirect("/topics");
   }
 }
-export function create(req, res, next) {
+export async function create(req, res, next) {
   const authorized = new Authorizer(req.user).create();
 
   if (authorized) {
-    let newTopic = {
+    let newTopicData = {
       title: req.body.title,
       description: req.body.description
     };
-    addTopic(newTopic, (err, topic) => {
-      if (err) {
-        res.redirect(500, "/topics/new");
-      } else {
-        res.redirect(303, `/topics/${topic.id}`);
-      }
-    });
+    try {
+      const topic = await addTopic(newTopicData);
+      res.redirect(303, `/topics/${topic.id}`);
+    } catch (err) {
+      res.redirect(500, "/topics/new");
+    }
   } else {
     req.flash("notice", "You are not authorized to do that.");
     res.redirect("/topics");
   }
 }
-export function show(req, res, next) {
-  getTopic(req.params.id, (err, topic) => {
-    if (err || topic == null) {
+export async function show(req, res, next) {
+  try {
+    const topic = await getTopic(req.params.id);
+    if (topic == null) {
       res.redirect(404, "/");
     } else {
       res.render("topics/show", { topic });
     }
-  });
+  } catch (err) {
+    res.redirect(404, "/");
+  }
 }
-export function edit(req, res, next) {
-  getTopic(req.params.id, (err, topic) => {
-    if (err || topic == null) {
+export async function edit(req, res, next) {
+  try {
+    const topic = await getTopic(req.params.id);
+    if (topic == null) {
       res.redirect(404, "/");
     } else {
       const authorized = new Authorizer(req.user, topic).edit();
@@ -62,23 +64,27 @@ export function edit(req, res, next) {
         res.redirect(`/topics/${req.params.id}`);
       }
     }
-  });
+  } catch (err) {
+    res.redirect(404, "/");
+  }
 }
-export function destroy(req, res, next) {
-  deleteTopic(req, (err, topic) => {
-    if (err) {
-      res.redirect(err, `/topics/${req.params.id}`);
-    } else {
-      res.redirect(303, "/topics");
-    }
-  });
+export async function destroy(req, res, next) {
+  try {
+    await deleteTopic(req);
+    res.redirect(303, "/topics");
+  } catch (err) {
+    res.redirect(err, `/topics/${req.params.id}`);
+  }
 }
-export function update(req, res, next) {
-  updateTopic(req, req.body, (err, topic) => {
-    if (err || topic == null) {
+export async function update(req, res, next) {
+  try {
+    const topic = await updateTopic(req, req.body);
+    if (topic == null) {
       res.redirect(401, `/topics/${req.params.id}/edit`);
     } else {
       res.redirect(`/topics/${req.params.id}`);
     }
-  });
+  } catch (err) {
+    res.redirect(401, `/topics/${req.params.id}/edit`);
+  }
 }

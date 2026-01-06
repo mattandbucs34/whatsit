@@ -1,4 +1,4 @@
-import ApplicationPolicy from "./application";
+import ApplicationPolicy from "./application.js";
 
 export default class TopicPolicy extends ApplicationPolicy {
   new() {

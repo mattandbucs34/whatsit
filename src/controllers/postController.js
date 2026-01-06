@@ -1,5 +1,5 @@
-import { addPost, getPost, deletePost, updatePost } from "../db/queries.posts.js";
-import Authorizer from "../policies/post";
+import * as PostQueries from "../db/queries.posts.js";
+import Authorizer from "../policies/post.js";
 
 export function newPost(req, res, next) {
   const authorized = new Authorizer(req.user).new();
@@ -10,48 +10,50 @@ export function newPost(req, res, next) {
     res.redirect(`/topics/${req.params.topicId}/posts/${req.params.id}/new`);
   }
 }
-export function createPost(req, res, next) {
+export async function createPost(req, res, next) {
   const authorized = new Authorizer(req.user).create();
   if (authorized) {
-    let newPost = {
+    let newPostData = {
       title: req.body.title,
       body: req.body.body,
       topicId: req.params.topicId,
       userId: req.user.id
     };
-    addPost(newPost, (err, post) => {
-      if (err) {
-        res.redirect(500, "/posts/new");
-      } else {
-        res.redirect(303, `/topics/${newPost.topicId}/posts/${post.id}`);
-      }
-    });
+    try {
+      const post = await PostQueries.addPost(newPostData);
+      res.redirect(303, `/topics/${newPostData.topicId}/posts/${post.id}`);
+    } catch (err) {
+      res.redirect(500, "/posts/new");
+    }
   } else {
     req.flash("notice", "You are not authorized to do that!");
     res.redirect(`/topics/${req.params.topicId}`);
   }
 }
-export function showPost(req, res, next) {
-  getPost(req, (err, post) => {
-    if (err || post == null) {
+export async function showPost(req, res, next) {
+  try {
+    const post = await PostQueries.getPost(req);
+    if (post == null) {
       res.redirect(404, "/");
     } else {
       res.render("posts/show", { post });
     }
-  });
+  } catch (err) {
+    res.redirect(404, "/");
+  }
 }
-export function destroyPost(req, res, next) {
-  deletePost(req, (err, post) => {
-    if (err) {
-      res.redirect(302, `/topics/${req.params.topicId}/posts/${req.params.id}`);
-    } else {
-      res.redirect(303, `/topics/${req.params.topicId}`);
-    }
-  });
+export async function destroyPost(req, res, next) {
+  try {
+    await PostQueries.deletePost(req);
+    res.redirect(303, `/topics/${req.params.topicId}`);
+  } catch (err) {
+    res.redirect(302, `/topics/${req.params.topicId}/posts/${req.params.id}`);
+  }
 }
-export function editPost(req, res, next) {
-  getPost(req, (err, post) => {
-    if (err || post == null) {
+export async function editPost(req, res, next) {
+  try {
+    const post = await PostQueries.getPost(req);
+    if (post == null) {
       res.redirect(404, "/");
     } else {
       const authorized = new Authorizer(req.user, post).edit();
@@ -62,14 +64,24 @@ export function editPost(req, res, next) {
         res.redirect(`/topics/${req.params.topicId}`);
       }
     }
-  });
+  } catch (err) {
+    res.redirect(404, "/");
+  }
 }
-export function updatePost(req, res, next) {
-  updatePost(req.params.id, req.body, (err, post) => {
-    if (err || post == null) {
-      res.redirect(401, `/topics/${req.params.topicId}/posts/${req.params.id}/edit`);
+export async function updatePost(req, res, next) {
+  try {
+    const post = await PostQueries.getPost(req);
+    if (!post) return res.redirect(404, "/");
+
+    const authorized = new Authorizer(req.user, post).update();
+    if (authorized) {
+      await PostQueries.updatePost(req.params.id, req.body);
+      res.redirect(`/topics/${req.params.topicId}/posts/${req.params.id}`);
     } else {
+      req.flash("notice", "You are not authorized to do that!");
       res.redirect(`/topics/${req.params.topicId}/posts/${req.params.id}`);
     }
-  });
+  } catch (err) {
+    res.redirect(401, `/topics/${req.params.topicId}/posts/${req.params.id}/edit`);
+  }
 }

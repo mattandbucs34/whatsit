@@ -1,18 +1,18 @@
 import express from "express";
 const router = express.Router();
-import postController from "../controllers/postController";
-import validation from "./validation-routes";
-import helper from "../auth/helpers";
+import * as postController from "../controllers/postController.js";
+import * as validation from "./validation-routes.js";
+import * as helper from "../auth/helpers.js";
 
-router.get("/topics/:topicId/posts/new", postController.new);
-router.get("/topics/:topicId/posts/:id", postController.show);
-router.get("/topics/:topicId/posts/:id/edit", postController.edit);
+router.get("/topics/:topicId/posts/new", postController.newPost);
+router.get("/topics/:topicId/posts/:id", postController.showPost);
+router.get("/topics/:topicId/posts/:id/edit", postController.editPost);
 
 router.post("/topics/:topicId/posts/create",
   helper.ensureAuthenticated,
   validation.validatePosts,
-  postController.create);
-router.post("/topics/:topicId/posts/:id/destroy", postController.destroy);
-router.post("/topics/:topicId/posts/:id/update", validation.validatePosts, postController.update);
+  postController.createPost);
+router.post("/topics/:topicId/posts/:id/destroy", postController.destroyPost);
+router.post("/topics/:topicId/posts/:id/update", validation.validatePosts, postController.updatePost);
 
-module.exports = router;
+export default router;

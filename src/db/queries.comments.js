@@ -1,5 +1,6 @@
-import Comment from "./models";
-import Authorizer from "../policies/comment-policy";
+import db from "./models/index.js";
+const Comment = db.Comment;
+import Authorizer from "../policies/comment-policy.js";
 
 export async function createComment(newComment) {
     try {
@@ -13,7 +14,7 @@ export async function createComment(newComment) {
 
 export async function deleteComment(req) {
     try {
-        const comment = await Comment.findById(req.params.id);
+        const comment = await Comment.findByPk(req.params.id);
         const authorized = new Authorizer(req.user, comment).destroy();
 
         if (authorized) {

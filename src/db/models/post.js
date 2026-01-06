@@ -73,14 +73,16 @@ export default (sequelize, DataTypes) => {
       }); */
   };
 
-  Post.prototype.hasUpvoteFor = () => {
+  Post.prototype.hasUpvoteFor = function (userId) {
+    if (!this.votes) return false;
     const foundUpvote = this.votes.filter((vote) => {
       return ((vote.value === 1) && (vote.userId === userId));
     });
     return foundUpvote.length === 1;
   };
 
-  Post.prototype.hasDownvoteFor = () => {
+  Post.prototype.hasDownvoteFor = function (userId) {
+    if (!this.votes) return false;
     const foundDownvote = this.votes.filter((vote) => {
       return ((vote.value === -1) && (vote.userId === userId));
     });
