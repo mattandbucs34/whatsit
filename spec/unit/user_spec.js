@@ -1,15 +1,15 @@
-const sequelize = require("../../src/db/models/index").sequelize;
-const User = require("../../src/db/models").User;
+import { sequelize } from "../../src/db/models/index";
+import { User } from "../../src/db/models";
 
 describe("User", () => {
   beforeEach((done) => {
-    sequelize.sync({force: true})
-    .then(() => {
-      done();
-    }).catch((err) => {
-      console.log(err);
-      done();
-    });
+    sequelize.sync({ force: true })
+      .then(() => {
+        done();
+      }).catch((err) => {
+        console.log(err);
+        done();
+      });
   });
 
   describe("#create()", () => {
@@ -63,5 +63,5 @@ describe("User", () => {
     });
   });
 
-  
+
 });

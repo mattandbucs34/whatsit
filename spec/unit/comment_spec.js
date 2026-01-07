@@ -1,8 +1,8 @@
-const sequelize = require("../../src/db/models/index").sequelize;
-const Topic = require("../../src/db/models").Topic;
-const Post = require("../../src/db/models").Post;
-const User = require("../../src/db/models").User;
-const Comment = require("../../src/db/models").Comment;
+import { sequelize } from "../../src/db/models/index";
+import { Topic } from "../../src/db/models";
+import { Post } from "../../src/db/models";
+import { User } from "../../src/db/models";
+import { Comment } from "../../src/db/models";
 
 describe("Comment", () => {
   beforeEach((done) => {
@@ -11,7 +11,7 @@ describe("Comment", () => {
     this.post;
     this.comment;
 
-    sequelize.sync({force: true}).then((res) => {
+    sequelize.sync({ force: true }).then((res) => {
       User.create({
         email: "velma@mysterymachine.com",
         password: "jenkies"
@@ -88,14 +88,14 @@ describe("Comment", () => {
         password: "password"
       }).then((newUser) => {
         expect(this.comment.userId).toBe(this.user.id);
-        
+
         this.comment.setUser(newUser).then((comment) => {
           expect(comment.userId).toBe(newUser.id);
           done();
         });
       });
     });
-  })
+  });
 
   describe("#getUser()", () => {
     it("should return the associated user", (done) => {

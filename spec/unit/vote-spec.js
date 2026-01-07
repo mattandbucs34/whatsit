@@ -1,9 +1,9 @@
-const sequelize = require("../../src/db/models/index").sequelize;
-const Topic = require("../../src/db/models").Topic;
-const Post = require("../../src/db/models").Post;
-const Comment = require("../../src/db/models").Comment;
-const User = require("../../src/db/models").User;
-const Vote = require("../../src/db/models").Vote;
+import { sequelize } from "../../src/db/models/index";
+import { Topic } from "../../src/db/models";
+import { Post } from "../../src/db/models";
+import { Comment } from "../../src/db/models";
+import { User } from "../../src/db/models";
+import { Vote } from "../../src/db/models";
 
 describe("Vote", () => {
   beforeEach((done) => {
@@ -13,7 +13,7 @@ describe("Vote", () => {
     this.comment;
     this.vote;
 
-    sequelize.sync({force: true}).then((res) => {
+    sequelize.sync({ force: true }).then((res) => {
       User.create({
         email: "velma@mysterymachine.com",
         password: "jenkies"
@@ -102,12 +102,12 @@ describe("Vote", () => {
   describe("setUser()", () => {
     it("should associate a vote and a user together", (done) => {
       Vote.create({
-        value: -1, 
+        value: -1,
         postId: this.post.id,
         userId: this.user.id
       }).then((vote) => {
         this.vote = vote;
-        
+
         expect(vote.userId).toBe(this.user.id);
 
         User.create({
@@ -176,7 +176,7 @@ describe("Vote", () => {
   describe("#getPost()", () => {
     it("should return the associated post", (done) => {
       Vote.create({
-        value: 1, 
+        value: 1,
         userId: this.user.id,
         postId: this.post.id
       }).then((vote) => {

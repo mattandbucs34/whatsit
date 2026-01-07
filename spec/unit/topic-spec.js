@@ -1,7 +1,7 @@
-const sequelize = require("../../src/db/models/index").sequelize;
-const Topic = require("../../src/db/models").Topic;
-const Post = require("../../src/db/models").Post;
-const User = require("../../src/db/models").User;
+import { sequelize } from "../../src/db/models/index";
+import { Topic } from "../../src/db/models";
+import { Post } from "../../src/db/models";
+import { User } from "../../src/db/models";
 
 describe("Topic", () => {
 
@@ -10,7 +10,7 @@ describe("Topic", () => {
     this.post;
     this.user;
 
-    sequelize.sync({force: true}).then((res) => {
+    sequelize.sync({ force: true }).then((res) => {
       User.create({
         email: "shaggy@mysterymachine.com",
         password: "ScoobySnack69"
