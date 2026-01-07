@@ -1,11 +1,11 @@
 import * as AdvertQueries from "../db/queries.adverts.js";
 
 export async function index(req, res, next) {
-    const response = await AdvertQueries.getAllAdverts();
-    if (response.error) {
+    const adverts = await AdvertQueries.getAllAdverts();
+    if (adverts.error) {
         res.redirect(500, "static/index");
     } else {
-        res.render("adverts/index", { response });
+        res.render("adverts/index", { adverts });
     }
 }
 
@@ -28,11 +28,11 @@ export async function createAdvert(req, res, next) {
 }
 
 export async function showAdvert(req, res, next) {
-    const response = await AdvertQueries.getAdvert(req.params.id);
-    if (response.error) {
+    const advert = await AdvertQueries.getAdvert(req.params.id);
+    if (!advert || advert.error) {
         res.redirect(404, "/");
     } else {
-        res.render("adverts/show", { response });
+        res.render("adverts/show", { advert });
     }
 }
 
@@ -47,21 +47,21 @@ export async function destroyAdvert(req, res, next) {
 }
 
 export async function editAdvert(req, res, next) {
-    const response = await AdvertQueries.getAdvert(req.params.id);
+    const advert = await AdvertQueries.getAdvert(req.params.id);
 
-    if (response.error) {
+    if (!advert || advert.error) {
         res.redirect(404, "/");
     } else {
-        res.render("adverts/edit", { response });
+        res.render("adverts/edit", { advert });
     }
 }
 
 export async function updateAdvert(req, res, next) {
-    const response = await AdvertQueries.updateAdvert(req.params.id, req.body);
+    const advert = await AdvertQueries.updateAdvert(req.params.id, req.body);
 
-    if (response.error || !response) {
+    if (!advert || advert.error) {
         res.redirect(404, `/adverts/${req.params.id}/edit`);
     } else {
-        res.redirect(`/adverts/${response.id}`);
+        res.redirect(303, `/adverts/${advert.id}`);
     }
 }

@@ -1,12 +1,10 @@
-const request = require("request");
-const server = require("../../src/server");
+import { get } from "request";
 const base = "http://localhost:3000/topics";
-const sequelize = require("../../src/db/models/index").sequelize;
-const Topic = require("../../src/db/models").Topic;
-const Post = require("../../src/db/models").Post;
-const User = require("../../src/db/models").User;
-const Comment = require("../../src/db/models").Comment;
-const Vote = require("../../src/db/models").Vote;
+import { sequelize } from "../../src/db/models/index";
+import { Topic } from "../../src/db/models";
+import { Post } from "../../src/db/models";
+import { User } from "../../src/db/models";
+import { Vote } from "../../src/db/models";
 
 describe("routes : votes", () => {
   beforeEach((done) => {
@@ -16,7 +14,7 @@ describe("routes : votes", () => {
     this.comment;
     this.vote;
 
-    sequelize.sync({force: true}).then((res) => {
+    sequelize.sync({ force: true }).then((res) => {
       User.create({
         email: "velma@mysterymachine.com",
         password: "jenkies"
@@ -40,7 +38,7 @@ describe("routes : votes", () => {
           this.topic = res;
           this.post = this.topic.posts[0];
           done();
-  
+
         }).catch((err) => {
           console.log(err);
           done();
@@ -51,7 +49,7 @@ describe("routes : votes", () => {
 
   describe("guest attempting to vote on a post", () => {
     beforeEach((done) => {
-      request.get({
+      get({
         url: "http://localhost:3000/auth/fake",
         form: {
           userId: 0
@@ -66,7 +64,7 @@ describe("routes : votes", () => {
         const options = {
           url: `${base}/${this.topic.id}/posts/${this.post.id}/votes/upvote`
         };
-        request.get(options, (err, res, body) => {
+        get(options, (err, res, body) => {
           Vote.findOne({
             where: {
               userId: this.user.id,
@@ -86,7 +84,7 @@ describe("routes : votes", () => {
 
   describe("signed in user voting on a post", () => {
     beforeEach((done) => {
-      request.get({
+      get({
         url: "http://localhost:3000/auth/fake",
         form: {
           role: "member",
@@ -102,7 +100,7 @@ describe("routes : votes", () => {
         const options = {
           url: `${base}/${this.topic.id}/posts/${this.post.id}/votes/upvote`
         };
-        request.get(options, (err, res, body) => {
+        get(options, (err, res, body) => {
           Vote.findOne({
             where: {
               userId: this.user.id,
@@ -125,7 +123,7 @@ describe("routes : votes", () => {
         const options = {
           url: `${base}/${this.topic.id}/posts/${this.post.id}/votes/mockvote`
         };
-        request.get(options, (err, res, body) => {
+        get(options, (err, res, body) => {
           Vote.findOne({
             where: {
               value: 2
@@ -144,7 +142,7 @@ describe("routes : votes", () => {
         const options = {
           url: `${base}/${this.topic.id}/posts/${this.post.id}/votes/upvote`
         };
-        request.get(options, (err, res, body) => {
+        get(options, (err, res, body) => {
           Vote.findOne({
             where: {
               userId: this.user.id,
@@ -153,7 +151,7 @@ describe("routes : votes", () => {
           }).then((vote) => {
             expect(vote).not.toBeNull();
           }).then(() => {
-            request.get(options, (err, res, body) => {
+            get(options, (err, res, body) => {
               Vote.findOne({
                 where: {
                   userId: this.user.id,
@@ -168,8 +166,8 @@ describe("routes : votes", () => {
                 expect(newVote.userId).toBe(this.user.id);
                 expect(newVote.postId).toBe(this.post.id);
                 done();
-              })
-            })
+              });
+            });
           }).catch((err) => {
             console.log(err);
             done();
@@ -183,7 +181,7 @@ describe("routes : votes", () => {
         const options = {
           url: `${base}/${this.topic.id}/posts/${this.post.id}/votes/downvote`
         };
-        request.get(options, (err, res, body) => {
+        get(options, (err, res, body) => {
           Vote.findOne({
             where: {
               userId: this.user.id,
@@ -203,12 +201,12 @@ describe("routes : votes", () => {
       });
     });
 
-    describe("GET /topics/:topicId/posts/:postId/votes/upvote" , () => {
+    describe("GET /topics/:topicId/posts/:postId/votes/upvote", () => {
       it("should not create an upvote if value is incorrect", (done) => {
         const options = {
           url: `${base}/${this.topic.id}/posts/${this.post.id}/votes/upvote`
         };
-        request.get(options, (err, res, body) => {
+        get(options, (err, res, body) => {
           Vote.findOne({
             where: {
               postId: this.post.id
@@ -218,7 +216,7 @@ describe("routes : votes", () => {
               expect(voteCount).toBe(1);
               done();
             });
-            
+
           }).catch((err) => {
             console.log(err);
             done();
@@ -233,7 +231,7 @@ describe("routes : votes", () => {
           url: `${base}/${this.topic.id}/posts/${this.post.id}/votes/upvote`
         };
 
-        request.get(options, (err, res, body) => {
+        get(options, (err, res, body) => {
           Vote.findOne({
             where: {
               userId: this.user.id,
@@ -247,7 +245,7 @@ describe("routes : votes", () => {
               url: `${base}/${this.topic.id}/posts/${this.post.id}/votes/downvote`
             };
 
-            request.get(options, (err, res, body) => {
+            get(options, (err, res, body) => {
               Vote.findOne({
                 where: {
                   userId: this.user.id,
@@ -257,11 +255,11 @@ describe("routes : votes", () => {
                 expect(vote).not.toBeNull();
                 expect(vote.value).toBe(-1);
                 done();
-              })
-            })
-          })
-        })
-      })
-    })
+              });
+            });
+          });
+        });
+      });
+    });
   });
 });

@@ -1,13 +1,11 @@
 
 [1m[46m RUN [49m[22m [36mv4.0.16 [39m[90mC:/Users/matta/Documents/Projects/whatsit[39m
 
-(node:30804) [SEQUELIZE0004] DeprecationWarning: A boolean value was passed to options.operatorsAliases. This is a no-op with v5 and should be removed.
-(Use `node --trace-deprecation ...` to show where the warning was created)
- [32m✓[39m spec/integration/static.spec.js[2m > [22mroutes : static[2m > [22mGET /[2m > [22mshould return status code 200 and have 'Welcome to Whatsit' in the body[32m 34[2mms[22m[39m
- [32m✓[39m spec/integration/static.spec.js[2m > [22mroutes : static[2m > [22mGET /about[2m > [22mshould return status code 200 and contain 'About Us' in the body[32m 7[2mms[22m[39m
+ [32m✓[39m spec/integration/advert.spec.js [2m([22m[2m7 tests[22m[2m)[22m[33m 1230[2mms[22m[39m
+       [33m[2m✓[22m[39m should return a status of 200 and all adverts [33m 328[2mms[22m[39m
 
 [2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
-[2m      Tests [22m [1m[32m2 passed[39m[22m[90m (2)[39m
-[2m   Start at [22m 15:32:59
-[2m   Duration [22m 2.03s[2m (transform 247ms, setup 0ms, import 1.68s, tests 42ms, environment 0ms)[22m
+[2m      Tests [22m [1m[32m7 passed[39m[22m[90m (7)[39m
+[2m   Start at [22m 09:19:17
+[2m   Duration [22m 3.50s[2m (transform 293ms, setup 0ms, import 1.99s, tests 1.23s, environment 0ms)[22m
 

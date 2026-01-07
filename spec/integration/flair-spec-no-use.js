@@ -1,10 +1,9 @@
-const request = require("request");
-const server = require("../../src/server");
+import { get, post as _post } from "request";
 const base = "http://localhost:3000/flairs/";
-const sequelize = require("../../src/db/models/index").sequelize;
-const Topic = require("../../src/db/models").Topic;
-const Post = require("../../src/db/models").Post;
-const Flair = require("../../src/db/models").Flair;
+import { sequelize } from "../../src/db/models/index";
+import { Topic } from "../../src/db/models";
+import { Post } from "../../src/db/models";
+import { Flair } from "../../src/db/models";
 
 describe("routes : flairs", () => {
   beforeEach((done) => {
@@ -12,7 +11,7 @@ describe("routes : flairs", () => {
     this.post;
     this.flair;
 
-    sequelize.sync({force: true}).then((res) => {
+    sequelize.sync({ force: true }).then((res) => {
       Flair.create({
         name: "Green Flair",
         color: "green"
@@ -41,13 +40,13 @@ describe("routes : flairs", () => {
           done();
         });
       });
-      
+
     });
   });
 
   describe("GET /flairs/new", () => {
     it("should render a form to create a new flair", (done) => {
-      request.get(`${base}new`, (err, res, body) => {
+      get(`${base}new`, (err, res, body) => {
         expect(err).toBeNull();
         expect(body).toContain("New Flair");
         done();
@@ -64,23 +63,23 @@ describe("routes : flairs", () => {
           color: "pink"
         }
       };
-      request.post(options, (err, res, body) => {
-        Flair.findOne({where: {name: "Pink is a Warning"}})
-        .then((flair) => {
-          expect(flair.name).toBe("Pink is a Warning");
-          expect(flair.color).toBe("pink");
-          done();
-        }).catch((err) => {
-          console.log(err);
-          done();
-        });
+      _post(options, (err, res, body) => {
+        Flair.findOne({ where: { name: "Pink is a Warning" } })
+          .then((flair) => {
+            expect(flair.name).toBe("Pink is a Warning");
+            expect(flair.color).toBe("pink");
+            done();
+          }).catch((err) => {
+            console.log(err);
+            done();
+          });
       });
     });
   });
 
   describe("GET /flairs/:name", () => {
     it("should render a view with the selected Flair", (done) => {
-      request.get(`${base}${this.flair.name}`, (err, res, body) => {
+      get(`${base}${this.flair.name}`, (err, res, body) => {
         expect(err).toBeNull();
         expect(body).toContain("Green Flair");
         done();
@@ -95,12 +94,12 @@ describe("routes : flairs", () => {
 
         expect(flairCountBeforeDelete).toBe(1);
 
-        request.post(`${base}${this.flair.name}/destroy`, (err, res, body) => {
+        _post(`${base}${this.flair.name}/destroy`, (err, res, body) => {
           Flair.all().then((flairs) => {
             expect(err).toBeNull();
             expect(flairs.length).toBe(flairCountBeforeDelete - 1);
             done();
-          })
+          });
         });
       });
     });
@@ -108,7 +107,7 @@ describe("routes : flairs", () => {
 
   describe("GET /flairs/:name/edit", () => {
     it("should render a view with a Flair edit form", (done) => {
-      request.get(`${base}${this.flair.name}/edit`, (err, res, body) => {
+      get(`${base}${this.flair.name}/edit`, (err, res, body) => {
         expect(err).toBeNull();
         expect(body).toContain("Edit Flair");
         expect(body).toContain("Green Flair");
@@ -127,11 +126,11 @@ describe("routes : flairs", () => {
         }
       };
 
-      request.post(options, (err, res, body) => {
+      _post(options, (err, res, body) => {
         expect(err).toBeNull();
 
         Flair.findOne({
-          where: {name: "Not for the squeamish"}
+          where: { name: "Not for the squeamish" }
         }).then((flair) => {
           expect(flair.name).toBe("Not for the squeamish");
           expect(flair.color).toBe("olive");

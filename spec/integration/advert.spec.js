@@ -1,134 +1,96 @@
-const request = require("request");
-const server = require("../../src/server");
-const base = "http://localhost:3000/adverts/";
-const sequelize = require("../../src/db/models/index").sequelize;
-const Advert = require("../../src/db/models").Advert;
+import request from "supertest";
+import app from "../../src/app.js";
+import models from "../../src/db/models/index";
+const { sequelize, Advert } = models;
+import { describe, it, beforeEach, expect } from "vitest";
 
 describe("routes : adverts", () => {
+  let advert;
 
-  beforeEach((done) => {
-    this.advert;
-    sequelize.sync({force: true}).then((res) => {
-      Advert.create({
-        title: "Advertising at its Finest",
-        description: "Everyone loves advertising!"
-      })
-      .then((advert) => {
-        this.advert = advert;
-        done();
-      })
-      .catch((err) => {
-        console.log(err);
-        done();
-      });
+  beforeEach(async () => {
+    await sequelize.sync({ force: true });
+    advert = await Advert.create({
+      title: "Advertising at its Finest",
+      description: "Everyone loves advertising!"
     });
   });
 
   describe("GET /adverts", () => {
-    it("should return a status of 200 and all adverts", (done) => {
-      request.get(base, (err, res, body) => {
-        expect(res.statusCode).toBe(200);
-        expect(err).toBeNull();
-        expect(body).toContain("Advertisements");
-        expect(body).toContain("Advertising at its Finest");
-        done();
-      });
+    it("should return a status of 200 and all adverts", async () => {
+      const res = await request(app).get("/adverts");
+      expect(res.statusCode).toBe(200);
+      expect(res.text).toContain("Advertisements");
+      expect(res.text).toContain("Advertising at its Finest");
     });
   });
 
   describe("GET /adverts/new", () => {
-    it("should render a new advertisement form", (done) => {
-      request.get(`${base}new`, (err, res, body) => {
-        expect(err).toBeNull();
-        expect(body).toContain("New Advertisement");
-        done();
-      });
+    it("should render a new advertisement form", async () => {
+      const res = await request(app).get("/adverts/new");
+      expect(res.statusCode).toBe(200);
+      expect(res.text).toContain("New Advertisement");
     });
   });
 
   describe("POST /adverts/create", () => {
-    const adInfo = {
-      url: `${base}create`,
-      form: {
-        title: "Dog Breath",
-        description: "Does your breath smell like wet dog?"
-      }
-    };
-
-    it("should create a new advertisement and redirect", (done) => {
-      request.post(adInfo, (err, res, body) => {
-        Advert.findOne({where: {title: "Dog Breath"}})
-        .then((advert) => {
-          expect(res.statusCode).toBe(303);
-          expect(advert.title).toBe("Dog Breath");
-          expect(advert.description).toBe("Does your breath smell like wet dog?");
-          done();
-        })
-        .catch((err) => {
-          console.log(err);
-          done();
+    it("should create a new advertisement and redirect", async () => {
+      const res = await request(app)
+        .post("/adverts/create")
+        .type("form")
+        .send({
+          title: "Dog Breath",
+          description: "Does your breath smell like wet dog?"
         });
-      });
+
+      const newAdvert = await Advert.findOne({ where: { title: "Dog Breath" } });
+      expect(res.statusCode).toBe(303);
+      expect(newAdvert.title).toBe("Dog Breath");
+      expect(newAdvert.description).toBe("Does your breath smell like wet dog?");
     });
   });
 
   describe("GET /adverts/:id", () => {
-    it("should render a view with the selected advertisement", (done) => {
-      request.get(`${base}${this.advert.id}`, (err, res, body) => {
-        expect(err).toBeNull();
-        expect(body).toContain("Advertising at its Finest");
-        done();
-      });
+    it("should render a view with the selected advertisement", async () => {
+      const res = await request(app).get(`/adverts/${advert.id}`);
+      expect(res.statusCode).toBe(200);
+      expect(res.text).toContain("Advertising at its Finest");
     });
   });
 
   describe("POST /adverts/:id/destroy", () => {
-    it("should delete the advertisement with the associated ID", (done) => {
-      Advert.all().then((adverts) => {
-        const advertCount = adverts.length;
-        expect(advertCount).toBe(1);
+    it("should delete the advertisement with the associated ID", async () => {
+      const advertCount = await Advert.count();
+      expect(advertCount).toBe(1);
 
-        request.post(`${base}${this.advert.id}/destroy`, (err, res, body) => {
-          Advert.all().then((adverts) => {
-            expect(err).toBeNull();
-            expect(adverts.length).toBe(advertCount - 1);
-            done();
-          })
-        });
-      });
+      const res = await request(app).post(`/adverts/${advert.id}/destroy`);
+      const finalCount = await Advert.count();
+      expect(res.statusCode).toBe(303);
+      expect(finalCount).toBe(advertCount - 1);
     });
   });
 
   describe("GET /adverts/:id/edit", () => {
-    it("should render a view with an edit advertisement form", (done) => {
-      request.get(`${base}${this.advert.id}/edit`, (err, res, body) => {
-        expect(err).toBeNull();
-        expect(body).toContain("Edit Advertisement");
-        expect(body).toContain("Advertising at its Finest");
-        done();
-      });
+    it("should render a view with an edit advertisement form", async () => {
+      const res = await request(app).get(`/adverts/${advert.id}/edit`);
+      expect(res.statusCode).toBe(200);
+      expect(res.text).toContain("Edit Advertisement");
+      expect(res.text).toContain("Advertising at its Finest");
     });
   });
 
   describe("POST /adverts/:id/update", () => {
-    it("should update the topic with given values", (done) => {
-      const adInfo = {
-        url: `${base}${this.advert.id}/update`,
-        form: {
+    it("should update the advertisement with given values", async () => {
+      const res = await request(app)
+        .post(`/adverts/${advert.id}/update`)
+        .type("form")
+        .send({
           title: "Things to Love",
           description: "I love me some good food"
-        }
-      };
-
-      request.post(adInfo, (err, res, body) => {
-        expect(err).toBeNull();
-        Advert.findOne({
-          where: {id: this.advert.id}
-        }).then((advert) => {
-          expect(advert.title).toBe("Things to Love");
-          done();
         });
-      });
+
+      const updatedAdvert = await Advert.findByPk(advert.id);
+      expect(res.statusCode).toBe(303);
+      expect(updatedAdvert.title).toBe("Things to Love");
     });
   });
 });

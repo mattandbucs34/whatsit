@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { readdirSync, readFileSync } from 'fs';
 import { basename as _basename, join, dirname } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';

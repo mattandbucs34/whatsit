@@ -1,11 +1,10 @@
-const request = require("request");
-const server = require("../../src/server");
+import { get, post } from "request";
 const base = "http://localhost:3000/topics";
-const sequelize = require("../../src/db/models/index").sequelize;
-const Topic = require("../../src/db/models").Topic;
-const Post = require("../../src/db/models").Post;
-const User = require("../../src/db/models").User;
-const Comment = require("../../src/db/models").Comment;
+import { sequelize } from "../../src/db/models/index";
+import { Topic } from "../../src/db/models";
+import { Post } from "../../src/db/models";
+import { User } from "../../src/db/models";
+import { Comment } from "../../src/db/models";
 
 describe("routes : comments", () => {
   beforeEach((done) => {
@@ -14,7 +13,7 @@ describe("routes : comments", () => {
     this.post;
     this.comment;
 
-    sequelize.sync({force: true}).then((res) => {
+    sequelize.sync({ force: true }).then((res) => {
       User.create({
         email: "velma@mysterymachine.com",
         password: "jenkies"
@@ -57,9 +56,9 @@ describe("routes : comments", () => {
     });
   });
 
-  describe("guest attempting to perform CRUD operations for Comment", ()=> {
+  describe("guest attempting to perform CRUD operations for Comment", () => {
     beforeEach((done) => {
-      request.get({
+      get({
         url: "http://localhost:3000/auth/fake",
         form: {
           userId: 0
@@ -68,7 +67,7 @@ describe("routes : comments", () => {
         done();
       });
     });
-  
+
 
     describe("POST /topics/:topicId/posts/:postId/comments/create", () => {
       it("should not create a new comment", (done) => {
@@ -78,8 +77,8 @@ describe("routes : comments", () => {
             body: "This comment is amazing!"
           }
         };
-        request.post(options, (err, res, body) => {
-          Comment.findOne({where: {body: "This comment is amazing!"}}).then((comment) => {
+        post(options, (err, res, body) => {
+          Comment.findOne({ where: { body: "This comment is amazing!" } }).then((comment) => {
             expect(comment).toBeNull();
             done();
           }).catch((err) => {
@@ -91,13 +90,13 @@ describe("routes : comments", () => {
     });
 
     describe("POST /topics/:topicId/posts/:postId/comments/:id/destroy", () => {
-      it("should not delete the comment with the associated ID" , (done) => {
+      it("should not delete the comment with the associated ID", (done) => {
         Comment.all().then((comments) => {
           const commentCountBeforeDelete = comments.length;
 
           expect(commentCountBeforeDelete).toBe(1);
 
-          request.post(
+          post(
             `${base}/${this.topic.id}/posts/${this.post.id}/comments/${this.comment.id}/destroy`,
             (err, res, body) => {
               Comment.all().then((comments) => {
@@ -105,7 +104,7 @@ describe("routes : comments", () => {
                 expect(comments.length).toBe(commentCountBeforeDelete);
                 done();
               });
-          });
+            });
         });
       });
     });
@@ -113,7 +112,7 @@ describe("routes : comments", () => {
 
   describe("signed in user performing CRUD operations for Comment", () => {
     beforeEach((done) => {
-      request.get({
+      get({
         url: "http://localhost:3000/auth/fake",
         form: {
           role: "member",
@@ -133,8 +132,8 @@ describe("routes : comments", () => {
           }
         };
 
-        request.post(options, (err, res, body) => {
-          Comment.findOne({where: {body: "This comment is amazing!"}}).then((comment) => {
+        post(options, (err, res, body) => {
+          Comment.findOne({ where: { body: "This comment is amazing!" } }).then((comment) => {
             expect(comment).not.toBeNull();
             expect(comment.body).toBe("This comment is amazing!");
             expect(comment.id).not.toBeNull();
@@ -154,8 +153,8 @@ describe("routes : comments", () => {
 
           expect(commentCountBeforeDelete).toBe(1);
 
-          request.post(
-            `${base}/${this.topic.id}/posts/${this.post.id}/comments/${this.comment.id}/destroy`, 
+          post(
+            `${base}/${this.topic.id}/posts/${this.post.id}/comments/${this.comment.id}/destroy`,
             (err, res, body) => {
               expect(res.statusCode).toBe(302);
               Comment.all().then((comments) => {
@@ -171,7 +170,7 @@ describe("routes : comments", () => {
 
   describe("member attempting to perform CRUD operations for Comment by other user", () => {
     beforeEach((done) => {
-      request.get({
+      get({
         url: "http://localhost:3000/auth/fake",
         form: {
           role: "member",
@@ -189,7 +188,7 @@ describe("routes : comments", () => {
 
           expect(commentCountBeforeDelete).toBe(1);
 
-          request.post(
+          post(
             `${base}/${this.topic.id}/posts/${this.post.id}/comments/${this.comment.id}/destroy`,
             (err, res, body) => {
               Comment.all().then((comments) => {
@@ -197,7 +196,7 @@ describe("routes : comments", () => {
                 expect(comments.length).toBe(commentCountBeforeDelete);
                 done();
               });
-          });
+            });
         });
       });
     });
@@ -205,7 +204,7 @@ describe("routes : comments", () => {
 
   describe("admin attempting to delete a user Comment", () => {
     beforeEach((done) => {
-      request.get({
+      get({
         url: "http://localhost:3000/auth/fake",
         form: {
           role: "admin",
@@ -215,15 +214,15 @@ describe("routes : comments", () => {
         done();
       });
     });
-    
+
     it("should delete the comment from a user via admin validation", (done) => {
       Comment.all().then((comments) => {
         const commentCountBeforeDelete = comments.length;
 
         expect(commentCountBeforeDelete).toBe(1);
 
-        request.post(
-          `${base}/${this.topic.id}/posts/${this.post.id}/comments/${this.comment.id}/destroy`, 
+        post(
+          `${base}/${this.topic.id}/posts/${this.post.id}/comments/${this.comment.id}/destroy`,
           (err, res, body) => {
             expect(res.statusCode).toBe(302);
             Comment.all().then((comments) => {
@@ -233,6 +232,6 @@ describe("routes : comments", () => {
             });
           });
       });
-    })
-  })
+    });
+  });
 });

@@ -1,11 +1,10 @@
-const request = require("request");
-const server = require("../../src/server");
+import { get, post } from "request";
 const base = "http://localhost:3000/topics";
-const sequelize = require("../../src/db/models/index").sequelize;
-const Topic = require("../../src/db/models").Topic;
-const Post = require("../../src/db/models").Post;
-const User = require("../../src/db/models").User;
-const Favorite = require("../../src/db/models").Favorite;
+import { sequelize } from "../../src/db/models/index";
+import { Topic } from "../../src/db/models";
+import { Post } from "../../src/db/models";
+import { User } from "../../src/db/models";
+import { Favorite } from "../../src/db/models";
 
 describe("routes : favorites", () => {
   beforeEach((done) => {
@@ -13,7 +12,7 @@ describe("routes : favorites", () => {
     this.topic;
     this.post;
 
-    sequelize.sync({force: true}).then((res) => {
+    sequelize.sync({ force: true }).then((res) => {
       User.create({
         email: "velma@mysterymachine.com",
         password: "jenkies"
@@ -47,7 +46,7 @@ describe("routes : favorites", () => {
 
   describe("guest attempting to favorite a post", () => {
     beforeEach((done) => {
-      request.get({
+      get({
         url: "http://localhost:3000/auth/fake",
         form: {
           userId: 0
@@ -68,7 +67,7 @@ describe("routes : favorites", () => {
         this.post.getFavorites().then((favorites) => {
           favCountBeforeCreate = favorites.length;
 
-          request.post(options, (err, res, body) => {
+          post(options, (err, res, body) => {
             Favorite.all().then((favorite) => {
               expect(favCountBeforeCreate).toBe(favorite.length);
               done();
@@ -84,7 +83,7 @@ describe("routes : favorites", () => {
 
   describe("signed in user favoriting a post", () => {
     beforeEach((done) => {
-      request.get({
+      get({
         url: "http://localhost:3000/auth/fake",
         form: {
           role: "member",
@@ -101,7 +100,7 @@ describe("routes : favorites", () => {
           url: `${base}/${this.topic.id}/posts/${this.post.id}/favorites/create`
         };
 
-        request.post(options, (err, res, body) => {
+        post(options, (err, res, body) => {
           Favorite.findOne({
             where: {
               userId: this.user.id,
@@ -127,14 +126,14 @@ describe("routes : favorites", () => {
         };
 
         let favCountBeforeDelete;
-        
-        request.post(options, (err, res, body) => {
+
+        post(options, (err, res, body) => {
           setTimeout(() => {
             this.post.getFavorites().then((favorites) => {
               const favorite = favorites[0];
               favCountBeforeDelete = favorites.length;
-              
-              request.post(`${base}/${this.topic.id}/posts/${this.post.id}/favorites/${favorite.id}/destroy`,
+
+              post(`${base}/${this.topic.id}/posts/${this.post.id}/favorites/${favorite.id}/destroy`,
                 (err, res, body) => {
                   this.post.getFavorites().then((favorites) => {
                     expect(favorites.length).toBe(favCountBeforeDelete - 1);
