@@ -1,4 +1,5 @@
 import request from "supertest";
+import app from "../../src/app.js";
 const base = "http://localhost:3000/users";
 import models from "../../src/db/models/index";
 import { describe, it, beforeEach, expect } from "vitest";
@@ -22,7 +23,7 @@ describe("routes : users", () => {
     });
 
     describe("POST /users", () => {
-        it("should create a new user with valid values and redirect", (done) => {
+        it("should create a new user with valid values and redirect", async () => {
             const options = {
                 url: base,
                 form: {
@@ -31,95 +32,93 @@ describe("routes : users", () => {
                 }
             };
 
-            post(options, (err, res, body) => {
-                User.findOne({ where: { email: "user@example.com" } }).then((user) => {
-                    expect(user).not.toBeNull();
-                    expect(user.email).toBe("user@example.com");
-                    expect(user.id).toBe(1);
-                    done();
-                }).catch((err) => {
-                    console.log(err);
-                    done();
-                });
+            const res = await request(app)
+                .post("/users")
+                .type("form")
+                .send(options.form);
+
+            const newUser = await User.findOne({
+                where: { email: "user@example.com" }
             });
+
+            expect(res.statusCode).toBe(303);
+            expect(newUser).not.toBeNull();
+            expect(newUser.email).toBe("user@example.com");
+            expect(newUser.id).toBe(1);
         });
 
-        it("should not create a new user with invalid attributes and redirect", (done) => {
-            post({
+        it("should not create a new user with invalid attributes and redirect", async () => {
+
+            const options = {
                 url: base,
                 form: {
                     email: "no",
                     password: "123456789"
                 }
-            },
-                (err, res, body) => {
-                    User.findOne({ where: { email: "no" } }).then((user) => {
-                        expect(user).toBeNull();
-                        done();
-                    }).catch((err) => {
-                        console.log(err);
-                        done();
-                    });
-                });
+            };
+
+            const res = await request(app)
+                .post("/users")
+                .type("form")
+                .send(options.form);
+
+            const newUser = await User.findOne({
+                where: { email: "no" }
+            });
+
+            expect(res.statusCode).toBe(302);
+            expect(newUser).toBeNull();
         });
     });
 
     describe("GET /users/sign_in", () => {
-        it("should render a view with a sign in form", (done) => {
-            get(`${base}/sign_in`, (err, res, body) => {
-                expect(err).toBeNull();
-                expect(body).toContain("Sign In");
-                done();
-            });
+        it("should render a view with a sign in form", async () => {
+            const res = await request(app).get("/users/sign_in");
+
+            expect(res.statusCode).toBe(200);
+            expect(res.text).toContain("Sign In");
+        });
+    });
+});
+
+describe("GET /users/:id", () => {
+    let user;
+    let post;
+    let topic;
+    let comment;
+
+    beforeEach(async () => {
+
+        user = await User.create({
+            email: "velma@mysterymachine.com",
+            password: "jenkies"
+        });
+
+        topic = await Topic.create({
+            title: "Haunted Mansions Galore",
+            description: "Finding monsters one haunted house at a time",
+        });
+
+        post = await Post.create({
+            title: "Not haunted",
+            body: "It was Mr. Wilson in a monster disguise",
+            userId: user.id,
+            topicId: topic.id
+        });
+
+        comment = await Comment.create({
+            body: "Zoinks!!!",
+            userId: user.id,
+            postId: post.id
         });
     });
 
-    describe("GET /users/:id", () => {
-        beforeEach((done) => {
-            this.user;
-            this.post;
-            this.comment;
+    it("should present a list of comments and posts a user has created", async () => {
 
-            User.create({
-                email: "velma@mysterymachine.com",
-                password: "jenkies"
-            }).then((user) => {
-                this.user = user;
+        const res = await request(app).get(`/users/${user.id}`);
 
-                Topic.create({
-                    title: "Haunted Mansions Galore",
-                    description: "Finding monsters one haunted house at a time",
-                    posts: [{
-                        title: "Not haunted",
-                        body: "It was Mr. Wilson in a monster disguise",
-                        userId: this.user.id
-                    }]
-                }, {
-                    include: {
-                        model: Post,
-                        as: "posts"
-                    }
-                }).then((res) => {
-                    this.post = res.posts[0];
-
-                    Comment.create({
-                        body: "Zoinks!!!",
-                        userId: this.user.id,
-                        postId: this.post.id
-                    }).then((comment) => {
-                        this.comment = comment;
-                        done();
-                    });
-                });
-            });
-        });
-
-        it("should present a list of comments and posts a user has created", (done) => {
-            get(`${base}/${this.user.id}`, (err, res, body) => {
-                expect(body).toContain("Not haunted");
-                //expect(body).toContain("Zoinks!!!");
-                done();
-            });
-        });
+        expect(res.statusCode).toBe(200);
+        expect(res.text).toContain("Not haunted");
+        expect(res.text).toContain("Zoinks!!!");
     });
 });

@@ -2,9 +2,37 @@
 
 Formerly known as Bloccit, this application is a Reddit-like application. Users can create and edit posts while providing comments and favorites.
 
-[Click Here](https://dashboard.heroku.com/apps/mattychat) for a live look into the application!
-
 ---
+
+## Migrations
+
+Run migrations with the following command:
+
+```bash
+npx sequelize-cli db:migrate
+```
+
+Run test migrations with the following command:
+
+```bash
+npx sequelize-cli db:migrate --env test
+```
+
+## Unit Tests
+
+Run unit tests with the following command:
+
+```bash
+npx vitest
+```
+
+## Integration Tests
+
+Run integration tests with the following command:
+
+```bash
+npx vitest run spec/integration
+```
 
 ## Resources
 

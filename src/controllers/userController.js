@@ -15,16 +15,18 @@ export async function create(req, res, next) {
     const user = await createUser(newUser);
     passport.authenticate("local")(req, res, () => {
       req.flash("notice", "You've successfully created an account!");
-      res.redirect("/");
+      res.redirect(303, "/");
     });
   } catch (err) {
     req.flash("error", err);
-    res.redirect("/users/sign_up");
+    res.redirect(500,"/users/sign_up");
   }
 }
+
 export function signInForm(req, res, next) {
   res.render("users/sign_in");
 }
+
 export function signIn(req, res, next) {
   passport.authenticate("local")(req, res, () => {
     if (!req.user) {
@@ -36,6 +38,7 @@ export function signIn(req, res, next) {
     }
   });
 }
+
 export function signOut(req, res, next) {
   req.logout((err) => {
     if (err) { return next(err); }
@@ -43,6 +46,7 @@ export function signOut(req, res, next) {
     res.redirect("/");
   });
 }
+
 export async function show(req, res, next) {
   try {
     const result = await getUser(req.params.id);
