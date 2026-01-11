@@ -9,8 +9,11 @@ const __dirname = dirname(__filename);
 const basename = _basename(__filename);
 const env = process.env.NODE_ENV || 'development';
 
-const configPath = join(__dirname, '..', 'config', 'config.json');
-const config = JSON.parse(readFileSync(configPath, 'utf8'))[env];
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+
+const configPath = join(__dirname, '..', 'config', 'config.cjs');
+const config = require(configPath)[env];
 const db = {};
 
 let sequelize;
