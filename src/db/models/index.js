@@ -16,6 +16,15 @@ const configPath = join(__dirname, '..', 'config', 'config.cjs');
 const config = require(configPath)[env];
 const db = {};
 
+console.log('--- DB INIT ---');
+console.log('ENV:', env);
+console.log('CONFIG:', JSON.stringify(config, null, 2));
+console.log('VAR_NAME:', config.use_env_variable);
+console.log('VAR_VALUE_EXISTS:', !!process.env[config.use_env_variable]);
+if (process.env[config.use_env_variable]) {
+  console.log('VAR_VALUE_START:', process.env[config.use_env_variable].substring(0, 10));
+}
+
 let sequelize;
 if (config.use_env_variable) {
   sequelize = new Sequelize(process.env[config.use_env_variable], config);

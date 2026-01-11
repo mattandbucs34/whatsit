@@ -4,6 +4,6 @@ import { init as initAppConfig } from "./config/main-config.js";
 import { init as initRouteConfig } from "./config/route-config.js";
 
 initAppConfig(app, express);
-initRouteConfig(app);
+await initRouteConfig(app);
 
 export default app;

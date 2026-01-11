@@ -8,10 +8,10 @@ import commentRoutes from "../routes/comments.js";
 import voteRoutes from "../routes/votes.js";
 import favoriteRoutes from "../routes/favorites.js";
 
-export function init(app) {
+export async function init(app) {
   if (process.env.NODE_ENV === "test") {
-    // For now, commenting this out as it requires async handling
-    // import("../../spec/support/mock-auth.js").then(mockAuth => mockAuth.fakeIt(app));
+    const mockAuth = await import("../../spec/support/mock-auth.js");
+    mockAuth.default.fakeIt(app);
   }
 
   app.use(staticRoutes);

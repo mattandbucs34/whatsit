@@ -7,10 +7,10 @@ const request = supertest(app);
 describe("routes : static", () => {
 
   describe("GET /", () => {
-    it("should return status code 200 and have 'Welcome to Whatsit' in the body", async () => {
+    it("should return status code 200 and have 'Universe of Whatsit' in the body", async () => {
       const res = await request.get("/");
       expect(res.statusCode).toBe(200);
-      expect(res.text).toContain("Welcome to Whatsit");
+      expect(res.text).toContain("Universe of Whatsit");
     });
   });
 

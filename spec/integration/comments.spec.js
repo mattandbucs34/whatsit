@@ -1,10 +1,9 @@
-import { get, post } from "request";
+import request from "supertest";
+import app from "../../src/app.js";
+import { describe, it, beforeEach, expect } from "vitest";
 const base = "http://localhost:3000/topics";
 import { sequelize } from "../../src/db/models/index";
-import { Topic } from "../../src/db/models";
-import { Post } from "../../src/db/models";
-import { User } from "../../src/db/models";
-import { Comment } from "../../src/db/models";
+import { Topic, Post, User, Comment } from "../../src/db/models";
 
 describe("routes : comments", () => {
   beforeEach((done) => {
