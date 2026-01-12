@@ -12,6 +12,7 @@ export function newFlair(req, res, next) {
   res.render("flairs/new");
 }
 export async function createFlair(req, res, next) {
+  console.log("NEW FLAIR DATA: ", req.body);
   let newFlairData = {
     name: req.body.name,
     color: req.body.color

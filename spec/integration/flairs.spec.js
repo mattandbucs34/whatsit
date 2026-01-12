@@ -1,130 +1,128 @@
-import { get, post } from "request";
-const base = "http://localhost:3000/flairs/";
-import { sequelize } from "../../src/db/models/index";
-import { Flair } from "../../src/db/models";
+import request from "supertest";
+import app from "../../src/app";
+import models from "../../src/db/models/index";
+const { sequelize, Flair } = models;
+
+import { describe, it, beforeEach, expect } from "vitest";
+
+const base = "/flairs";
 
 describe("routes : flairs", () => {
-  beforeEach((done) => {
-    this.flair;
-    sequelize.sync({ force: true }).then((res) => {
-      Flair.create({
-        name: "What a Flair!",
-        color: "pink"
-      }).then((flair) => {
-        this.flair = flair;
-        done();
-      }).catch((err) => {
-        console.log(err);
-        done();
-      });
+    let flair;
+    beforeEach(async () => {
+        await sequelize.sync({ force: true });
+        try {
+            flair = await Flair.create({
+                name: "What a Flair!",
+                color: "pink"
+            });
+        } catch (error) {
+            console.log(error);
+        }
     });
-  });
 
-  describe("GET /flairs", () => {
-    it("should return a status code of 200 and all flairs", (done) => {
-      get(base, (err, res, body) => {
-        expect(res.statusCode).toBe(200);
-        expect(err).toBeNull();
-        expect(body).toContain("What a Flair!");
-        expect(body).toContain("pink");
-        done();
-      });
+    describe("GET /flairs", () => {
+        it("should return a status code of 200 and all flairs", async () => {
+            const res = await request(app).get(base);
+
+            expect(res.statusCode).toBe(200);
+            expect(res.text).toContain("What a Flair!");
+            expect(res.text).toContain("pink");
+        });
     });
-  });
 
-  describe("GET /flairs/new", () => {
-    it("should render a new flair form", (done) => {
-      get(`${base}new`, (err, res, body) => {
-        expect(err).toBeNull();
-        expect(body).toContain("New Flair");
-        done();
-      });
+    describe("GET /flairs/new", () => {
+        it("should render a new flair form", async () => {
+            const res = await request(app).get(`${base}/new`);
+
+            expect(res.statusCode).toBe(200);
+            expect(res.text).toContain("New Flair");
+        });
     });
-  });
 
-  describe("POST /flairs/create", () => {
-    const options = {
-      url: `${base}create`,
-      form: {
-        name: "Zing Flair",
-        color: "grey"
-      }
-    };
-    it("should create a new flair and redirect", (done) => {
-      post(options, (err, res, body) => {
-        Flair.findOne({ where: { name: "Zing Flair" } })
-          .then((flair) => {
+    describe("POST /flairs/create", () => {
+        const options = {
+            url: `${base}/create`,
+            form: {
+                name: "Zing Flair",
+                color: "grey"
+            }
+        };
+        it("should create a new flair and redirect", async () => {
+            const res = await request(app)
+                .post(options.url)
+                .type("form")
+                .send({ name: "Zing Flair", color: "grey" });
+
+            const flair = await Flair.findOne({
+                where: {
+                    name: "Zing Flair"
+                }
+            });
+
+            console.log('FLAIR: ', flair);
+
             expect(res.statusCode).toBe(303);
             expect(flair.name).toBe("Zing Flair");
             expect(flair.color).toBe("grey");
-            done();
-          })
-          .catch((err) => {
-            console.log(err);
-            done();
-          });
-      });
-    });
-  });
-
-  describe("GET /flairs/:name", () => {
-    it("should render a view with the selected flair", (done) => {
-      get(`${base}${this.flair.name}`, (err, res, body) => {
-        expect(err).toBeNull();
-        expect(body).toContain("What a Flair!");
-        done();
-      });
-    });
-  });
-
-  describe("POST /flairs/:name/destroy", () => {
-    it("should delete the flair with the associated name", (done) => {
-      Flair.all().then((flairs) => {
-        const flairCountBeforeDelete = flairs.length;
-
-        expect(flairCountBeforeDelete).toBe(1);
-
-        post(`${base}${this.flair.name}/destroy`, (err, res, body) => {
-          Flair.all().then((flairs) => {
-            expect(err).toBeNull();
-            expect(flairs.length).toBe(flairCountBeforeDelete - 1);
-            done();
-          });
         });
-      });
     });
-  });
 
-  describe("GET /flairs/:name/edit", () => {
-    it("should with a form to edit a flair", (done) => {
-      get(`${base}${this.flair.name}/edit`, (err, res, body) => {
-        expect(err).toBeNull();
-        expect(body).toContain("Edit Flair");
-        expect(body).toContain("What a Flair!");
-        done();
-      });
-    });
-  });
+    describe("GET /flairs/:name", () => {
+        it("should render a view with the selected flair", async () => {
+            const res = await request(app).get(`${base}/${flair.name}`);
 
-  describe("POST /flairs/:name/update", () => {
-    it("should update the flair with the given information", (done) => {
-      const options = {
-        url: `${base}${this.flair.name}/update`,
-        form: {
-          name: "Ric Flair WOOOOO",
-          color: "purple"
-        }
-      };
-
-      post(options, (err, res, body) => {
-        expect(err).toBeNull();
-        Flair.findOne({
-          where: { id: this.flair.id }
-        }).then((flair) => {
-          expect(flair.name).toBe("Ric Flair WOOOOO");
-          done();
+            expect(res.statusCode).toBe(200);
+            expect(res.text).toContain("What a Flair!");
         });
-      });
     });
-  });
+
+    describe("POST /flairs/:name/destroy", () => {
+        it("should delete the flair with the associated name", async () => {
+            const flairsBeforeDelete = await Flair.count();
+
+            expect(flairsBeforeDelete).toBe(1);
+
+            await request(app)
+                .post(`${base}/${flair.name}/destroy`);
+
+            const flairsAfterDelete = await Flair.count();
+
+            expect(flairsAfterDelete).toBe(flairsBeforeDelete - 1);
+        });
+    });
+
+    describe("GET /flairs/:name/edit", () => {
+        it("should with a form to edit a flair", async () => {
+            const res = await request(app).get(`${base}/${flair.name}/edit`);
+
+            expect(res.statusCode).toBe(200);
+            expect(res.text).toContain("Edit Flair");
+            expect(res.text).toContain("What a Flair!");
+        });
+    });
+
+    describe("POST /flairs/:name/update", () => {
+        it("should update the flair with the given information", async () => {
+            const options = {
+                url: `${base}/${flair.name}/update`,
+                form: {
+                    name: "Ric Flair WOOOOO",
+                    color: "purple"
+                }
+            };
+
+            const res = await request(app)
+                .post(options.url)
+                .type("form")
+                .send(options.form);
+
+            const updatedFlair = await Flair.findOne({
+                where: { id: flair.id }
+            });
+
+            expect(res.statusCode).toBe(302);
+            expect(updatedFlair.name).toBe("Ric Flair WOOOOO");
+        });
+    });
 });
