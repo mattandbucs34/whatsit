@@ -1,236 +1,184 @@
 import request from "supertest";
 import app from "../../src/app.js";
 import { describe, it, beforeEach, expect } from "vitest";
-const base = "http://localhost:3000/topics";
-import { sequelize } from "../../src/db/models/index";
-import { Topic, Post, User, Comment } from "../../src/db/models";
+import models from "../../src/db/models/index";
+const { sequelize, Topic, Post, User, Comment } = models;
+const base = "/topics";
 
 describe("routes : comments", () => {
-  beforeEach((done) => {
-    this.user;
-    this.topic;
-    this.post;
-    this.comment;
+    let user;
+    let admin;
+    let topic;
+    let post;
+    let comment;
+    beforeEach(async () => {
+        await sequelize.sync({ force: true });
 
-    sequelize.sync({ force: true }).then((res) => {
-      User.create({
-        email: "velma@mysterymachine.com",
-        password: "jenkies"
-      }).then((user) => {
-        this.user = user;
+        user = await User.create({
+            email: "velma@mysterymachine.com",
+            password: "jenkies",
+            role: "member"
+        });
 
-        Topic.create({
-          title: "Haunted Mansions Galore",
-          description: "Finding monsters one haunted house at a time",
-          posts: [{
-            title: "Not haunted",
-            body: "It was Mr. Wilson in a monster disguise",
-            userId: this.user.id
-          }]
+        admin = await User.create({
+            email: "admin@mysterymachine.com",
+            password: "jenkies",
+            role: "admin"
+        });
+
+        topic = await Topic.create({
+            title: "Haunted Mansions Galore",
+            description: "Finding monsters one haunted house at a time",
+            posts: [{
+                title: "Not haunted",
+                body: "It was Mr. Wilson in a monster disguise",
+                userId: user.id
+            }]
         }, {
-          include: {
-            model: Post,
-            as: "posts"
-          }
-        }).then((topic) => {
-          this.topic = topic;
-          this.post = this.topic.posts[0];
+            include: {
+                model: Post,
+                as: "posts"
+            }
+        });
+        post = topic.posts[0];
 
-          Comment.create({
+        comment = await Comment.create({
             body: "Zoinks!!!",
-            userId: this.user.id,
-            postId: this.post.id
-          }).then((comment) => {
-            this.comment = comment;
-            done();
-          }).catch((err) => {
-            console.log(err);
-            done();
-          }).catch((err) => {
-            console.log(err);
-            done();
-          });
+            userId: user.id,
+            postId: post.id
         });
-      });
-    });
-  });
-
-  describe("guest attempting to perform CRUD operations for Comment", () => {
-    beforeEach((done) => {
-      get({
-        url: "http://localhost:3000/auth/fake",
-        form: {
-          userId: 0
-        }
-      }, (err, res, body) => {
-        done();
-      });
     });
 
+    describe("guest attempting to perform CRUD operations for Comment", () => {
+        describe("POST /topics/:topicId/posts/:postId/comments/create", () => {
+            it("should not create a new comment", async () => {
+                const options = {
+                    url: `${base}/${topic.id}/posts/${post.id}/comments/create`,
+                    form: {
+                        body: "This comment is amazing!"
+                    }
+                };
+                await request(app)
+                    .post(options.url)
+                    .set("x-test-user-id", 0)
+                    .set("x-test-user-role", "guest")
+                    .type("form")
+                    .send(options.form);
 
-    describe("POST /topics/:topicId/posts/:postId/comments/create", () => {
-      it("should not create a new comment", (done) => {
-        const options = {
-          url: `${base}/${this.topic.id}/posts/${this.post.id}/comments/create`,
-          form: {
-            body: "This comment is amazing!"
-          }
-        };
-        post(options, (err, res, body) => {
-          Comment.findOne({ where: { body: "This comment is amazing!" } }).then((comment) => {
-            expect(comment).toBeNull();
-            done();
-          }).catch((err) => {
-            console.log(err);
-            done();
-          });
-        });
-      });
-    });
+                const newComment = await Comment.findOne({ where: { body: "This comment is amazing!" } });
 
-    describe("POST /topics/:topicId/posts/:postId/comments/:id/destroy", () => {
-      it("should not delete the comment with the associated ID", (done) => {
-        Comment.all().then((comments) => {
-          const commentCountBeforeDelete = comments.length;
-
-          expect(commentCountBeforeDelete).toBe(1);
-
-          post(
-            `${base}/${this.topic.id}/posts/${this.post.id}/comments/${this.comment.id}/destroy`,
-            (err, res, body) => {
-              Comment.all().then((comments) => {
-                expect(err).toBeNull();
-                expect(comments.length).toBe(commentCountBeforeDelete);
-                done();
-              });
+                expect(newComment).toBeNull();
             });
         });
-      });
-    });
-  });
 
-  describe("signed in user performing CRUD operations for Comment", () => {
-    beforeEach((done) => {
-      get({
-        url: "http://localhost:3000/auth/fake",
-        form: {
-          role: "member",
-          userId: this.user.id
-        }
-      }, (err, res, body) => {
-        done();
-      });
-    });
+        describe("POST /topics/:topicId/posts/:postId/comments/:id/destroy", () => {
+            it("should not delete the comment with the associated ID", async () => {
+                const { count: beforeCount } = await Comment.findAndCountAll();
 
-    describe("POST /topics/:topicId/posts/:postId/comments/create", () => {
-      it("should create a new comment and redirect", (done) => {
-        const options = {
-          url: `${base}/${this.topic.id}/posts/${this.post.id}/comments/create`,
-          form: {
-            body: "This comment is amazing!"
-          }
-        };
+                expect(beforeCount).toBe(1);
 
-        post(options, (err, res, body) => {
-          Comment.findOne({ where: { body: "This comment is amazing!" } }).then((comment) => {
-            expect(comment).not.toBeNull();
-            expect(comment.body).toBe("This comment is amazing!");
-            expect(comment.id).not.toBeNull();
-            done();
-          }).catch((err) => {
-            console.log(err);
-            done();
-          });
-        });
-      });
-    });
+                await request(app)
+                    .post(
+                        `${base}/${topic.id}/posts/${post.id}/comments/${comment.id}/destroy`
+                    )
+                    .set("x-test-user-id", 0)
+                    .set("x-test-user-role", "guest");
 
-    describe("POST /topics/:topicId/posts/:postId/comments/destroy", () => {
-      it("should delete the comment with the associated ID", (done) => {
-        Comment.all().then((comments) => {
-          const commentCountBeforeDelete = comments.length;
+                const { count: afterCount } = await Comment.findAndCountAll();
 
-          expect(commentCountBeforeDelete).toBe(1);
-
-          post(
-            `${base}/${this.topic.id}/posts/${this.post.id}/comments/${this.comment.id}/destroy`,
-            (err, res, body) => {
-              expect(res.statusCode).toBe(302);
-              Comment.all().then((comments) => {
-                expect(err).toBeNull();
-                expect(comments.length).toBe(commentCountBeforeDelete - 1);
-                done();
-              });
+                expect(afterCount).toBe(1);
+                expect(afterCount).toBe(beforeCount);
             });
         });
-      });
-    });
-  });
-
-  describe("member attempting to perform CRUD operations for Comment by other user", () => {
-    beforeEach((done) => {
-      get({
-        url: "http://localhost:3000/auth/fake",
-        form: {
-          role: "member",
-          userId: 999
-        }
-      }, (err, res, body) => {
-        done();
-      });
     });
 
-    describe("POST /topics/:topicId/posts/:postId/comments/destroy", () => {
-      it("should not delete the comment with the associated user ID", (done) => {
-        Comment.all().then((comments) => {
-          const commentCountBeforeDelete = comments.length;
+    describe("signed in user performing CRUD operations for Comment", () => {
+        describe("POST /topics/:topicId/posts/:postId/comments/create", () => {
+            it("should create a new comment and redirect", async () => {
+                const options = {
+                    url: `${base}/${topic.id}/posts/${post.id}/comments/create`,
+                    form: {
+                        body: "This comment is amazing!",
+                        userId: user.id,
+                        postId: post.id
+                    }
+                };
 
-          expect(commentCountBeforeDelete).toBe(1);
+                const res = await request(app)
+                    .post(options.url)
+                    .set("x-test-user-id", user.id)
+                    .set("x-test-user-role", user.role)
+                    .type("form")
+                    .send(options.form);
 
-          post(
-            `${base}/${this.topic.id}/posts/${this.post.id}/comments/${this.comment.id}/destroy`,
-            (err, res, body) => {
-              Comment.all().then((comments) => {
-                expect(err).toBeNull();
-                expect(comments.length).toBe(commentCountBeforeDelete);
-                done();
-              });
+                expect(res.statusCode).toBe(302);
+
+                const newComment = await Comment.findOne({
+                    where: {
+                        body: "This comment is amazing!"
+                    }
+                });
+
+                expect(newComment).not.toBeNull();
+                expect(newComment.body).toBe("This comment is amazing!");
+                expect(newComment.id).not.toBeNull();
             });
         });
-      });
+
+        describe("POST /topics/:topicId/posts/:postId/comments/destroy", () => {
+            it("should delete the comment with the associated ID", async () => {
+                const { count: beforeCount } = await Comment.findAndCountAll();
+
+                expect(beforeCount).toBe(1);
+
+                await request(app)
+                    .post(
+                        `${base}/${topic.id}/posts/${post.id}/comments/${comment.id}/destroy`)
+                    .set("x-test-user-id", user.id)
+                    .set("x-test-user-role", user.role);
+
+                const { count: afterCount } = await Comment.findAndCountAll();
+
+                expect(afterCount).toBe(beforeCount - 1);
+            });
+        });
     });
-  });
 
-  describe("admin attempting to delete a user Comment", () => {
-    beforeEach((done) => {
-      get({
-        url: "http://localhost:3000/auth/fake",
-        form: {
-          role: "admin",
-          userId: 999
-        }
-      }, (err, res, body) => {
-        done();
-      });
+    describe("member attempting to perform CRUD operations for Comment by other user", () => {
+        describe("POST /topics/:topicId/posts/:postId/comments/destroy", () => {
+            it("should not delete the comment with the associated user ID", async () => {
+                const { count: beforeCount } = await Comment.findAndCountAll();
+
+                expect(beforeCount).toBe(1);
+
+                await request(app)
+                    .post(
+                        `${base}/${topic.id}/posts/${post.id}/comments/${comment.id}/destroy`)
+                    .set("x-test-user-id", 0)
+                    .set("x-test-user-role", "member");
+
+                const { count: afterCount } = await Comment.findAndCountAll();
+
+                expect(afterCount).toBe(beforeCount);
+            });
+        });
     });
 
-    it("should delete the comment from a user via admin validation", (done) => {
-      Comment.all().then((comments) => {
-        const commentCountBeforeDelete = comments.length;
+    describe("admin attempting to delete a user Comment", () => {
+        it("should delete the comment from a user via admin validation", async () => {
+            const { count: beforeCount } = await Comment.findAndCountAll();
 
-        expect(commentCountBeforeDelete).toBe(1);
+            expect(beforeCount).toBe(1);
 
-        post(
-          `${base}/${this.topic.id}/posts/${this.post.id}/comments/${this.comment.id}/destroy`,
-          (err, res, body) => {
+            const res = await request(app)
+                .post(
+                    `${base}/${topic.id}/posts/${post.id}/comments/${comment.id}/destroy`)
+                .set("x-test-user-id", admin.id)
+                .set("x-test-user-role", admin.role);
+
             expect(res.statusCode).toBe(302);
-            Comment.all().then((comments) => {
-              expect(err).toBeNull();
-              expect(comments.length).toBe(commentCountBeforeDelete - 1);
-              done();
-            });
-          });
-      });
+            const { count: afterCount } = await Comment.findAndCountAll();
+            expect(afterCount).toBe(beforeCount - 1);
+        });
     });
-  });
 });

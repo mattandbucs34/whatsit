@@ -1,243 +1,287 @@
-import request from "supertest";
-import app from "../../src/app.js";
-import models from "../../src/db/models/index.js";
-const { sequelize, Topic, Post, User } = models;
-import { describe, it, beforeEach, expect } from "vitest";
+import { get, post as _post } from "request";
+const base = "http://localhost:3000/topics";
+import { sequelize } from "../../src/db/models/index";
+import { Topic } from "../../src/db/models";
+import { Post } from "../../src/db/models";
+import { User } from "../../src/db/models";
 
 describe("routes : posts", () => {
-  let topic;
-  let post;
-  let owner;
-  let otherUser;
-  let admin;
+    beforeEach((done) => {
+        this.topic;
+        this.post;
+        this.user;
 
-  beforeEach(async () => {
-    await sequelize.sync({ force: true });
+        sequelize.sync({ force: true }).then((res) => {
 
-    owner = await User.create({
-      email: "shaggy@mysterymachine.com",
-      password: "ScoobySnacks69",
-      role: "member"
+            User.create({
+                email: "shaggy@mysterymachine.com",
+                password: "ScoobySnacks69"
+            }).then((user) => {
+                this.user = user;
+
+                Topic.create({
+                    title: "Winter Games",
+                    description: "Post your Winter Games stories",
+                    posts: [{
+                        title: "Donner Party",
+                        body: "The Donner Party didn't play many Winter Games",
+                        userId: this.user.id
+                    }]
+                }, {
+                    include: {
+                        model: Post,
+                        as: "posts"
+                    }
+                }).then((topic) => {
+                    this.topic = topic;
+                    this.post = topic.posts[0];
+                    done();
+                });
+            });
+        });
     });
 
-    otherUser = await User.create({
-      email: "scrappy@mysterymachine.com",
-      password: "ScoobySnacksPhew",
-      role: "member"
-    });
-
-    admin = await User.create({
-      email: "velma@mysterymachine.com",
-      password: "Jenkies",
-      role: "admin"
-    });
-
-    topic = await Topic.create({
-      title: "Winter Games",
-      description: "Post your Winter Games stories",
-      posts: [{
-        title: "Donner Party",
-        body: "The Donner Party didn't play many Winter Games",
-        userId: owner.id
-      }]
-    }, {
-      include: {
-        model: Post,
-        as: "posts"
-      }
-    });
-
-    post = topic.posts[0];
-  });
-
-  describe("admin user performing CRUD actions for Posts", () => {
-    describe("GET /topics/:topicId/posts/new", () => {
-      it("should render a new post form", async () => {
-        const res = await request(app)
-          .get(`/topics/${topic.id}/posts/new`)
-          .set("x-test-user-id", admin.id)
-          .set("x-test-user-role", admin.role);
-
-        expect(res.statusCode).toBe(200);
-        expect(res.text).toContain("New Post");
-      });
-    });
-
-    describe("POST /topics/:topicId/posts/create", () => {
-      it("should create a new post and redirect", async () => {
-        const res = await request(app)
-          .post(`/topics/${topic.id}/posts/create`)
-          .set("x-test-user-id", admin.id)
-          .set("x-test-user-role", admin.role)
-          .type("form")
-          .send({
-            title: "Watching paint dry",
-            body: "Watching paint dry is nearly as fun as watching grass grow!"
-          });
-
-        const newPost = await Post.findOne({ where: { title: "Watching paint dry" } });
-        expect(res.statusCode).toBe(303);
-        expect(newPost).not.toBeNull();
-        expect(newPost.title).toBe("Watching paint dry");
-        expect(newPost.topicId).toBe(topic.id);
-      });
-    });
-
-    describe("GET /topics/:topicId/posts/:id", () => {
-      it("should render a view with the selected posts", async () => {
-        const res = await request(app)
-          .get(`/topics/${topic.id}/posts/${post.id}`)
-          .set("x-test-user-id", admin.id)
-          .set("x-test-user-role", admin.role);
-
-        expect(res.statusCode).toBe(200);
-        expect(res.text).toContain("Donner Party");
-      });
-    });
-
-    describe("POST /topics/:topicId/posts/:id/destroy", () => {
-      it("should delete the post with the associated ID", async () => {
-        const res = await request(app)
-          .post(`/topics/${topic.id}/posts/${post.id}/destroy`)
-          .set("x-test-user-id", admin.id)
-          .set("x-test-user-role", admin.role);
-
-        const deletedPost = await Post.findByPk(post.id);
-        expect(res.statusCode).toBe(303);
-        expect(deletedPost).toBeNull();
-      });
-    });
-
-    describe("GET /topics/:topicId/posts/:id/edit", () => {
-      it("should render a view with an edit post form", async () => {
-        const res = await request(app)
-          .get(`/topics/${topic.id}/posts/${post.id}/edit`)
-          .set("x-test-user-id", admin.id)
-          .set("x-test-user-role", admin.role);
-
-        expect(res.statusCode).toBe(200);
-        expect(res.text).toContain("Edit Post");
-        expect(res.text).toContain("Donner Party");
-      });
-    });
-
-    describe("POST /topics/:topicId/posts/:id/update", () => {
-      it("should update the post with the given values", async () => {
-        const res = await request(app)
-          .post(`/topics/${topic.id}/posts/${post.id}/update`)
-          .set("x-test-user-id", admin.id)
-          .set("x-test-user-role", admin.role)
-          .type("form")
-          .send({
-            title: "Snowman building competition",
-            body: "Do you wanna build a snowman?"
-          });
-
-        const updatedPost = await Post.findByPk(post.id);
-        expect(res.statusCode).toBe(302); // Controller uses default 302 for update
-        expect(updatedPost.title).toBe("Snowman building competition");
-      });
-    });
-
-    it("should not create a post that fails validation", async () => {
-      const res = await request(app)
-        .post(`/topics/${topic.id}/posts/create`)
-        .set("x-test-user-id", admin.id)
-        .set("x-test-user-role", admin.role)
-        .type("form")
-        .send({
-          title: "a",
-          body: "b"
+    describe("admin user performing CRUD actions for Posts", () => {
+        beforeEach((done) => {
+            User.create({
+                email: "velma@mysterymachine.com",
+                password: "Jenkies",
+                role: "admin"
+            }).then((user) => {
+                get({
+                    url: "http://localhost:3000/auth/fake",
+                    form: {
+                        role: user.role,
+                        userId: user.id,
+                        email: user.email
+                    }
+                }, (err, res, body) => {
+                    done();
+                });
+            });
         });
 
-      const failedPost = await Post.findOne({ where: { title: "a" } });
-      expect(failedPost).toBeNull();
+        describe("GET /topics/:topicId/posts/new", () => {
+            it("should render a new post form", (done) => {
+                get(`${base}/${this.topic.id}/posts/new`, (err, res, body) => {
+                    expect(err).toBeNull();
+                    expect(body).toContain("New Post");
+                    done();
+                });
+            });
+        });
+
+        describe("POST /topics/:topicId/posts/create", () => {
+            it("should create a new post and redirect", (done) => {
+                const options = {
+                    url: `${base}/${this.topic.id}/posts/create`,
+                    form: {
+                        title: "Watching paint dry",
+                        body: "Watching paint dry is nearly as fun as watching grass grow!"
+                    }
+                };
+                _post(options, (err, res, body) => {
+                    Post.findOne({ where: { title: "Watching paint dry" } })
+                        .then((post) => {
+                            expect(post).not.toBeNull();
+                            expect(post.title).toBe("Watching paint dry");
+                            expect(post.body).toBe("Watching paint dry is nearly as fun as watching grass grow!");
+                            expect(post.topicId).not.toBeNull();
+                            done();
+                        });
+                });
+            });
+        });
+
+        describe("GET /topics/:topicId/posts/:id", () => {
+            it("should render a view with the selected posts", (done) => {
+                get(`${base}/${this.topic.id}/posts/${this.post.id}`, (err, res, body) => {
+                    expect(err).toBeNull();
+                    expect(body).toContain("Donner Party");
+                    done();
+                });
+            });
+        });
+
+        describe("POST /topics/:topicId/posts/:id/destroy", () => {
+            it("should delete the post with the associated ID", (done) => {
+                expect(this.post.id).toBe(1);
+                _post(`${base}/${this.topic.id}/posts/${this.post.id}/destroy`, (err, res, body) => {
+                    Post.findById(1)
+                        .then((post) => {
+                            expect(err).toBeNull();
+                            expect(post).toBeNull();
+                            done();
+                        });
+                });
+            });
+        });
+
+        describe("GET /topics/:topicId/posts/:id/edit", () => {
+            it("should render a view with an edit post form", (done) => {
+                get(`${base}/${this.topic.id}/posts/${this.post.id}/edit`, (err, res, body) => {
+                    expect(err).toBeNull();
+                    expect(body).toContain("Edit Post");
+                    expect(body).toContain("Donner Party");
+                    done();
+                });
+            });
+        });
+
+        describe("POST /topics/:topicId/posts/:id/update", () => {
+            /* it("should return a status code 302", (done) => {
+              request.post({
+                url: `${base}/${this.topic.id}/posts/${this.post.id}/update`,
+                form: {
+                  title: "Snowman building competition",
+                  body: "Do you wanna build a snowman?"
+                }
+              }, (err, res, body) => {
+                expect(res.statusCode).toBe(302);
+                done();
+              });
+            }); */
+
+            it("should update the post with the given values", (done) => {
+                const options = {
+                    url: `${base}/${this.topic.id}/posts/${this.post.id}/update`,
+                    form: {
+                        title: "Snowman building competition"
+                    }
+                };
+                _post(options, (err, res, body) => {
+                    expect(err).toBeNull();
+                    Post.findOne({
+                        where: { id: this.post.id }
+                    }).then((post) => {
+                        expect(post.title).toBe("Donner Party");
+                        done();
+                    });
+                });
+            });
+        });
+
+        it("should not create a post that fails validation", (done) => {
+            const options = {
+                url: `${base}/${this.topic.id}/posts/create`,
+                form: {
+                    title: "a",
+                    body: "b"
+                }
+            };
+
+            _post(options, (err, res, body) => {
+                Post.findOne({ where: { title: "a" } }).then((post) => {
+                    expect(post).toBeNull();
+                    done();
+                }).catch((err) => {
+                    console.log(err);
+                    done();
+                });
+            });
+        });
     });
-  });
 
-  describe("member user (non-owner) performing CRUD actions for Posts", () => {
-    describe("GET /topics/:topicId/posts/new", () => {
-      it("should render the new post form (members can create)", async () => {
-        const res = await request(app)
-          .get(`/topics/${topic.id}/posts/new`)
-          .set("x-test-user-id", otherUser.id)
-          .set("x-test-user-role", otherUser.role);
+    describe("member user performing CRUD actions for Posts", () => {
+        beforeEach((done) => {
+            get({
+                url: "http://localhost:3000/auth/fake",
+                form: {
+                    role: "member"
+                }
+            }, (err, res, body) => {
+                done();
+            });
+        });
 
-        expect(res.statusCode).toBe(200);
-      });
+        describe("GET /topics/:topicId/posts/new", () => {
+            it("should redirect to the topics view", (done) => {
+                get(`${base}/${this.topic.id}`, (err, res, body) => {
+                    expect(err).toBeNull();
+                    expect(body).toContain("Topics");
+                    done();
+                });
+            });
+        });
+
+        describe("POST /topics/:topicId/posts/create", () => {
+            it("should not create a new post", (done) => {
+                const options = {
+                    url: `${base}/${this.topic.id}/posts/create`,
+                    form: {
+                        title: "Watching paint dry",
+                        body: "Watching paint dry is nearly as fun as watching grass grow!"
+                    }
+                };
+
+                _post(options, (err, res, body) => {
+                    Post.findOne({ where: { title: "Watching paint dry" } })
+                        .then((post) => {
+                            expect(post).toBeNull();
+                            done();
+                        }).catch((err) => {
+                            console.log(err);
+                            done();
+                        });
+                });
+            });
+        });
+
+        describe("GET /topics/:topicId/posts/:id", () => {
+            it("should render a view with the selected post", (done) => {
+                get(`${base}/${this.topic.id}/posts/${this.post.id}`, (err, res, body) => {
+                    expect(err).toBeNull();
+                    expect(body).toContain("Donner Party");
+                    done();
+                });
+            });
+        });
+
+        describe("POST /topics/:topicId/posts/:id/destroy", () => {
+            it("should not delete the post with the associated ID", (done) => {
+                expect(this.post.id).toBe(1);
+                _post(`${base}/${this.topic.id}/posts/${this.post.id}/destroy`, (err, res, body) => {
+                    Post.findById(1)
+                        .then((post) => {
+                            expect(err).toBeNull();
+                            expect(post.title).toBe("Donner Party");
+                            expect(post.body).toBe("The Donner Party didn't play many Winter Games");
+                            done();
+                        });
+                });
+            });
+        });
+
+        describe("GET /topics/:topicId/post/:id/edit", () => {
+            it("should not render a view with an edit post", (done) => {
+                get(`${base}/${this.topic.id}/posts/${this.post.id}/edit`, (err, res, body) => {
+                    expect(err).toBeNull();
+                    expect(body).not.toContain("Edit Post");
+                    done();
+                });
+            });
+        });
+
+        describe("POST /topics/:topicId/post/:id/update", () => {
+            it("should not update the post with the given data", (done) => {
+                const options = {
+                    url: `${base}/${this.topic.id}/posts/${this.post.id}/update`,
+                    form: {
+                        title: "Donner Party",
+                        description: "The Donner Party didn't play many Winter Games"
+                    }
+                };
+
+                _post(options, (err, res, body) => {
+                    expect(err).toBeNull();
+                    Post.findOne({
+                        where: { id: 1 }
+                    }).then((post) => {
+                        expect(post.title).toBe("Donner Party");
+                        done();
+                    });
+                });
+            });
+        });
     });
-
-    describe("POST /topics/:topicId/posts/create", () => {
-      it("should create a new post", async () => {
-        const res = await request(app)
-          .post(`/topics/${topic.id}/posts/create`)
-          .set("x-test-user-id", otherUser.id)
-          .set("x-test-user-role", otherUser.role)
-          .type("form")
-          .send({
-            title: "Member Post",
-            body: "I am a member and I can post!"
-          });
-
-        const newPost = await Post.findOne({ where: { title: "Member Post" } });
-        expect(newPost).not.toBeNull();
-        expect(newPost.userId).toBe(otherUser.id);
-      });
-    });
-
-    describe("GET /topics/:topicId/posts/:id/edit", () => {
-      it("should not render a view with an edit post if not owner", async () => {
-        const res = await request(app)
-          .get(`/topics/${topic.id}/posts/${post.id}/edit`)
-          .set("x-test-user-id", otherUser.id)
-          .set("x-test-user-role", otherUser.role);
-
-        expect(res.text).not.toContain("Edit Post");
-        expect(res.statusCode).toBe(302); // Redirect to topics
-      });
-    });
-
-    describe("POST /topics/:topicId/posts/:id/destroy", () => {
-      it("should not delete the post if not owner", async () => {
-        const res = await request(app)
-          .post(`/topics/${topic.id}/posts/${post.id}/destroy`)
-          .set("x-test-user-id", otherUser.id)
-          .set("x-test-user-role", otherUser.role);
-
-        const postStillExists = await Post.findByPk(post.id);
-        expect(postStillExists).not.toBeNull();
-      });
-    });
-  });
-
-  describe("guest user performing CRUD actions for Posts", () => {
-    describe("GET /topics/:topicId/posts/new", () => {
-      it("should redirect to the show topic view", async () => {
-        const res = await request(app)
-          .get(`/topics/${topic.id}/posts/new`);
-
-        expect(res.statusCode).toBe(302);
-      });
-    });
-
-    describe("GET /topics/:topicId/posts/:id", () => {
-      it("should render a view with the selected post", async () => {
-        const res = await request(app)
-          .get(`/topics/${topic.id}/posts/${post.id}`);
-
-        expect(res.statusCode).toBe(200);
-        expect(res.text).toContain("Donner Party");
-      });
-    });
-
-    describe("POST /topics/:topicId/posts/:id/destroy", () => {
-      it("should not delete the post", async () => {
-        const res = await request(app)
-          .post(`/topics/${topic.id}/posts/${post.id}/destroy`);
-
-        const postStillExists = await Post.findByPk(post.id);
-        expect(postStillExists).not.toBeNull();
-      });
-    });
-  });
 });
