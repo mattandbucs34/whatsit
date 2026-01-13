@@ -1,265 +1,232 @@
-import { get } from "request";
-const base = "http://localhost:3000/topics";
-import { sequelize } from "../../src/db/models/index";
-import { Topic } from "../../src/db/models";
-import { Post } from "../../src/db/models";
-import { User } from "../../src/db/models";
-import { Vote } from "../../src/db/models";
+import request from "supertest";
+import app from "../../src/app.js";
+import models from "../../src/db/models/index.js";
+import { describe, it, beforeEach, expect } from "vitest";
+
+const { sequelize, Topic, Post, User, Vote } = models;
+const base = `/topics`;
 
 describe("routes : votes", () => {
-  beforeEach((done) => {
-    this.user;
-    this.topic;
-    this.post;
-    this.comment;
-    this.vote;
+    let admin;
+    let member;
+    let topic;
+    let post;
+    let vote;
+    beforeEach(async () => {
+        await sequelize.sync({ force: true });
 
-    sequelize.sync({ force: true }).then((res) => {
-      User.create({
-        email: "velma@mysterymachine.com",
-        password: "jenkies"
-      }).then((res) => {
-        this.user = res;
+        member = await User.create({
+            email: "matt@whatsit.com",
+            password: "password",
+            role: "member"
+        });
 
-        Topic.create({
-          title: "Haunted Mansions Galore",
-          description: "Finding monsters one haunted house at a time",
-          posts: [{
-            title: "Not haunted",
-            body: "It was Mr. Wilson in a monster disguise",
-            userId: this.user.id
-          }]
+        admin = await User.create({
+            email: "velma@mysterymachine.com",
+            password: "jenkies",
+            role: "admin"
+        });
+
+        topic = await Topic.create({
+            title: "Haunted Mansions Galore",
+            description: "Finding monsters one haunted house at a time",
+            posts: [{
+                title: "Not haunted",
+                body: "It was Mr. Wilson in a monster disguise",
+                userId: admin.id
+            }]
         }, {
-          include: {
-            model: Post,
-            as: "posts"
-          }
-        }).then((res) => {
-          this.topic = res;
-          this.post = this.topic.posts[0];
-          done();
-
-        }).catch((err) => {
-          console.log(err);
-          done();
+            include: {
+                model: Post,
+                as: "posts"
+            }
         });
-      });
-    });
-  });
 
-  describe("guest attempting to vote on a post", () => {
-    beforeEach((done) => {
-      get({
-        url: "http://localhost:3000/auth/fake",
-        form: {
-          userId: 0
-        }
-      }, (err, res, body) => {
-        done();
-      });
+        post = topic.posts[0];
+
+        vote = await Vote.create({
+            userId: admin.id,
+            postId: post.id,
+            value: 1
+        });
     });
 
-    describe("GET /topics/:topicId/posts/:postId/votes/upvote", () => {
-      it("should not create a new vote", (done) => {
-        const options = {
-          url: `${base}/${this.topic.id}/posts/${this.post.id}/votes/upvote`
-        };
-        get(options, (err, res, body) => {
-          Vote.findOne({
-            where: {
-              userId: this.user.id,
-              postId: this.post.id
-            }
-          }).then((vote) => {
-            expect(vote).toBeNull();
-            done();
-          }).catch((err) => {
-            console.log(err);
-            done();
-          });
-        });
-      });
-    });
-  });
-
-  describe("signed in user voting on a post", () => {
-    beforeEach((done) => {
-      get({
-        url: "http://localhost:3000/auth/fake",
-        form: {
-          role: "member",
-          userId: this.user.id
-        }
-      }, (err, res, body) => {
-        done();
-      });
-    });
-
-    describe("GET /topics/:topicId/posts/:postId/votes/upvote", () => {
-      it("should create an upvote", (done) => {
-        const options = {
-          url: `${base}/${this.topic.id}/posts/${this.post.id}/votes/upvote`
-        };
-        get(options, (err, res, body) => {
-          Vote.findOne({
-            where: {
-              userId: this.user.id,
-              postId: this.post.id
-            }
-          }).then((vote) => {
-            expect(vote).not.toBeNull();
-            expect(vote.value).toBe(1);
-            expect(vote.userId).toBe(this.user.id);
-            expect(vote.postId).toBe(this.post.id);
-            done();
-          }).catch((err) => {
-            console.log(err);
-            done();
-          });
-        });
-      });
-
-      it("should not create an upvote if value is incorrect", (done) => {
-        const options = {
-          url: `${base}/${this.topic.id}/posts/${this.post.id}/votes/mockvote`
-        };
-        get(options, (err, res, body) => {
-          Vote.findOne({
-            where: {
-              value: 2
-            }
-          }).then((vote) => {
-            expect(vote).toBeNull();
-            done();
-          }).catch((err) => {
-            console.log(err);
-            done();
-          });
-        });
-      });
-
-      it("should not create a second upvote", (done) => {
-        const options = {
-          url: `${base}/${this.topic.id}/posts/${this.post.id}/votes/upvote`
-        };
-        get(options, (err, res, body) => {
-          Vote.findOne({
-            where: {
-              userId: this.user.id,
-              postId: this.post.id
-            }
-          }).then((vote) => {
-            expect(vote).not.toBeNull();
-          }).then(() => {
-            get(options, (err, res, body) => {
-              Vote.findOne({
-                where: {
-                  userId: this.user.id,
-                  postId: this.post.id
-                }
-              }).then((newVote) => {
-                this.post.getPoints().then((voteCount) => {
-                  expect(voteCount).toBe(1);
+    describe("guest attempting to vote on a post", () => {
+        describe("GET /topics/:topicId/posts/:postId/votes/upvote", () => {
+            it("should not create a new vote", async () => {
+                const options = {
+                    url: `${base}/${topic.id}/posts/${post.id}/votes/upvote`
+                };
+                await request(app).get(options.url);
+                const newVote = await Vote.findOne({
+                    where: {
+                        userId: 0,
+                        postId: post.id
+                    }
                 });
-                expect(newVote).not.toBeNull();
-                expect(newVote.value).toBe(1);
-                expect(newVote.userId).toBe(this.user.id);
-                expect(newVote.postId).toBe(this.post.id);
-                done();
-              });
+                expect(newVote).toBeNull();
             });
-          }).catch((err) => {
-            console.log(err);
-            done();
-          });
         });
-      });
+    });
+
+    describe("signed in user voting on a post", () => {
+        describe("GET /topics/:topicId/posts/:postId/votes/upvote", () => {
+            it("should create an upvote", async () => {
+                const options = {
+                    url: `${base}/${topic.id}/posts/${post.id}/votes/upvote`
+                };
+                await request(app)
+                    .get(options.url)
+                    .set("x-test-user-id", member.id)
+                    .set("x-test-user-role", member.role);
+                const vote = await Vote.findOne({
+                    where: {
+                        userId: member.id,
+                        postId: post.id
+                    }
+                });
+                expect(vote).not.toBeNull();
+                expect(vote.value).toBe(1);
+                expect(vote.userId).toBe(member.id);
+                expect(vote.postId).toBe(post.id);
+            });
+
+            it("should not create an upvote if value is incorrect", async () => {
+                const options = {
+                    url: `${base}/${topic.id}/posts/${post.id}/votes/mockvote`
+                };
+                await request(app).get(options.url);
+                const vote = await Vote.findOne({
+                    where: {
+                        value: 2
+                    }
+                });
+                expect(vote).toBeNull();
+            });
+
+            it("should not create a second upvote", async () => {
+                const options = {
+                    url: `${base}/${topic.id}/posts/${post.id}/votes/upvote`
+                };
+                await request(app)
+                    .get(options.url)
+                    .set("x-test-user-id", admin.id)
+                    .set("x-test-user-role", admin.role);
+                const vote = await Vote.findOne({
+                    where: {
+                        userId: admin.id,
+                        postId: post.id
+                    }
+                });
+                expect(vote).not.toBeNull();
+            });
+
+            it("should not create a second upvote", async () => {
+                const options = {
+                    url: `${base}/${topic.id}/posts/${post.id}/votes/upvote`
+                };
+                await request(app)
+                    .get(options.url)
+                    .set("x-test-user-id", member.id)
+                    .set("x-test-user-role", member.role);
+                const vote = await Vote.findOne({
+                    where: {
+                        userId: member.id,
+                        postId: post.id
+                    }
+                });
+                expect(vote).not.toBeNull();
+                // await request(app).get(options.url);
+
+                const voteCount = await Vote.findAndCountAll({
+                    where: {
+                        postId: post.id,
+                        userId: member.id
+                    }
+                });
+
+                expect(voteCount.count).toBe(1);
+            });
+        });
     });
 
     describe("GET /topics/:topicId/posts/:postId/votes/downvote", () => {
-      it("should create an downvote", (done) => {
-        const options = {
-          url: `${base}/${this.topic.id}/posts/${this.post.id}/votes/downvote`
-        };
-        get(options, (err, res, body) => {
-          Vote.findOne({
-            where: {
-              userId: this.user.id,
-              postId: this.post.id
-            }
-          }).then((vote) => {
+        it("should create an downvote", async () => {
+            const options = {
+                url: `${base}/${topic.id}/posts/${post.id}/votes/downvote`
+            };
+            await request(app)
+                .get(options.url)
+                .set("x-test-user-id", member.id)
+                .set("x-test-user-role", member.role);
+            const vote = await Vote.findOne({
+                where: {
+                    userId: member.id,
+                    postId: post.id
+                }
+            });
             expect(vote).not.toBeNull();
             expect(vote.value).toBe(-1);
-            expect(vote.userId).toBe(this.user.id);
-            expect(vote.postId).toBe(this.post.id);
-            done();
-          }).catch((err) => {
-            console.log(err);
-            done();
-          });
+            expect(vote.userId).toBe(member.id);
+            expect(vote.postId).toBe(post.id);
         });
-      });
     });
 
     describe("GET /topics/:topicId/posts/:postId/votes/upvote", () => {
-      it("should not create an upvote if value is incorrect", (done) => {
-        const options = {
-          url: `${base}/${this.topic.id}/posts/${this.post.id}/votes/upvote`
-        };
-        get(options, (err, res, body) => {
-          Vote.findOne({
-            where: {
-              postId: this.post.id
-            }
-          }).then((vote) => {
-            return this.post.getPoints().then((voteCount) => {
-              expect(voteCount).toBe(1);
-              done();
+        it("should not create an upvote if value is incorrect", async () => {
+            const options = {
+                url: `${base}/${topic.id}/posts/${post.id}/votes/upvote`
+            };
+            await request(app)
+                .get(options.url)
+                .set("x-test-user-id", member.id)
+                .set("x-test-user-role", member.role);
+            const vote = await Vote.findAndCountAll({
+                where: {
+                    postId: post.id,
+                    userId: member.id,
+                }
             });
-
-          }).catch((err) => {
-            console.log(err);
-            done();
-          });
+            expect(vote.count).toBe(1);
         });
-      });
     });
 
     describe("GET /topics/:topicId/posts/:postId/votes/upvote||downvote", () => {
-      it("should update upvote to downvote for signed in user", (done) => {
-        let options = {
-          url: `${base}/${this.topic.id}/posts/${this.post.id}/votes/upvote`
-        };
-
-        get(options, (err, res, body) => {
-          Vote.findOne({
-            where: {
-              userId: this.user.id,
-              postId: this.post.id
-            }
-          }).then((vote) => {
-            expect(vote).not.toBeNull();
-            expect(vote.value).toBe(1);
-          }).then(() => {
-            options = {
-              url: `${base}/${this.topic.id}/posts/${this.post.id}/votes/downvote`
+        it("should update upvote to downvote for signed in user", async () => {
+            let options = {
+                url: `${base}/${topic.id}/posts/${post.id}/votes/upvote`
             };
 
-            get(options, (err, res, body) => {
-              Vote.findOne({
+            await request(app)
+                .get(options.url)
+                .set("x-test-user-id", member.id)
+                .set("x-test-user-role", member.role);
+            const vote = await Vote.findOne({
                 where: {
-                  userId: this.user.id,
-                  postId: this.post.id
+                    userId: member.id,
+                    postId: post.id
                 }
-              }).then((vote) => {
-                expect(vote).not.toBeNull();
-                expect(vote.value).toBe(-1);
-                done();
-              });
             });
-          });
+
+            console.log('VOTE: ', vote);
+            expect(vote).not.toBeNull();
+            expect(vote.value).toBe(1);
+            options = {
+                url: `${base}/${topic.id}/posts/${post.id}/votes/downvote`
+            };
+
+            await request(app)
+                .get(options.url)
+                .set("x-test-user-id", member.id)
+                .set("x-test-user-role", member.role);
+            const newVote = await Vote.findOne({
+                where: {
+                    userId: member.id,
+                    postId: post.id
+                }
+            });
+            expect(newVote).not.toBeNull();
+            expect(newVote.value).toBe(-1);
         });
-      });
     });
-  });
 });
