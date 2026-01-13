@@ -1,6 +1,6 @@
 import request from "supertest";
 import app from "../../src/app.js";
-const base = "http://localhost:3000/users";
+const base = "/users";
 import models from "../../src/db/models/index";
 import { describe, it, beforeEach, expect } from "vitest";
 const { sequelize, User, Topic, Post, Comment } = models;
@@ -33,7 +33,7 @@ describe("routes : users", () => {
             };
 
             const res = await request(app)
-                .post("/users")
+                .post(options.url)
                 .type("form")
                 .send(options.form);
 
@@ -58,7 +58,7 @@ describe("routes : users", () => {
             };
 
             const res = await request(app)
-                .post("/users")
+                .post(options.url)
                 .type("form")
                 .send(options.form);
 

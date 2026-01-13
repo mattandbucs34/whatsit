@@ -15,7 +15,8 @@ describe("routes : favorites", () => {
         await sequelize.sync({ force: true });
         user = await User.create({
             email: "velma@mysterymachine.com",
-            password: "jenkies"
+            password: "jenkies",
+            role: "member"
         });
 
         topic = await Topic.create({
@@ -33,59 +34,34 @@ describe("routes : favorites", () => {
             }
         });
 
-        post = await Post.create({
-            title: "Not haunted",
-            body: "It was Mr. Wilson in a monster disguise",
-            userId: user.id,
-            topicId: topic.id
-        });
+        post = topic.posts[0];
     });
 
     describe("guest attempting to favorite a post", () => {
-        beforeEach(async () => {
-            console.log('TOPIC ID: ', topic.id);
-            console.log('POST ID: ', post.id);
-            try {
-                await request(app)
-                    .get("/auth/fake")
-                    .query({
-                        id: user.id
-                    });
-            } catch (error) {
-                console.log('ERROR: ', error);
-            }
-        });
-
         describe("POST /topics/:topicId/posts/:postId/favorites/create", () => {
             it("should not create a new favorite", async () => {
                 const urlString = `${base}/${topic.id}/posts/${post.id}/favorites/create`;
-
-
                 const favortiesBeforeCreate = await Favorite.count();
 
-                await request(app).post(urlString);
+                const res = await request(app).post(urlString);
 
                 const favoritesAfterCreate = await Favorite.count();
 
-                expect(favoritesAfterCreate).toBe(favortiesBeforeCreate + 1);
+                expect(res.statusCode).toBe(302); // Redirect to sign in/notice
+                expect(favoritesAfterCreate).toBe(favortiesBeforeCreate);
             });
         });
     });
 
     describe("signed in user favoriting a post", () => {
-        beforeEach(async () => {
-            await request(app)
-                .get("/auth/fake")
-                .query({
-                    id: user.id
-                });
-        });
-
         describe("POST /topics/:topicId/posts/:postId/favorites/create", () => {
             it("should create a favorite", async () => {
                 const urlString = `${base}/${topic.id}/posts/${post.id}/favorites/create`;
 
-                await request(app).post(urlString);
+                const res = await request(app)
+                    .post(urlString)
+                    .set("x-test-user-id", user.id)
+                    .set("x-test-user-role", user.role);
 
                 const favorite = await Favorite.findOne({
                     where: {
@@ -94,6 +70,7 @@ describe("routes : favorites", () => {
                     }
                 });
 
+                expect(res.statusCode).toBe(302); // Redirect back to post
                 expect(favorite).not.toBeNull();
                 expect(favorite.userId).toBe(user.id);
                 expect(favorite.postId).toBe(post.id);
@@ -102,11 +79,12 @@ describe("routes : favorites", () => {
 
         describe("POST /topics/:topicId/posts/:postId/favorites/:id/destroy", () => {
             it("should destroy a favorite", async () => {
-                const urlString = `${base}/${topic.id}/posts/${post.id}/favorites/create`;
-
-                await request(app).post(urlString);
-
-                const favCountBeforeDelete = await Favorite.count();
+                // First create a favorite
+                const createUrl = `${base}/${topic.id}/posts/${post.id}/favorites/create`;
+                await request(app)
+                    .post(createUrl)
+                    .set("x-test-user-id", user.id)
+                    .set("x-test-user-role", user.role);
 
                 const favorite = await Favorite.findOne({
                     where: {
@@ -115,35 +93,30 @@ describe("routes : favorites", () => {
                     }
                 });
 
-                await request(app).post(`${base}/${topic.id}/posts/${post.id}/favorites/${favorite.id}/destroy`);
+                const favCountBeforeDelete = await Favorite.count();
+
+                const res = await request(app)
+                    .post(`${base}/${topic.id}/posts/${post.id}/favorites/${favorite.id}/destroy`)
+                    .set("x-test-user-id", user.id)
+                    .set("x-test-user-role", user.role);
 
                 const favCountAfterDelete = await Favorite.count();
 
+                expect(res.statusCode).toBe(302);
                 expect(favCountAfterDelete).toBe(favCountBeforeDelete - 1);
             });
         });
     });
 
     describe("guest attempting to destroy a favorite", () => {
-        beforeEach(async () => {
-            try {
-                await request(app)
-                    .get("/auth/fake")
-                    .query({
-                        id: 0
-                    });
-            } catch (error) {
-                console.log('ERROR: ', error);
-            }
-        });
-
         describe("POST /topics/:topicId/posts/:postId/favorites/:id/destroy", () => {
             it("should not destroy a favorite", async () => {
-                const urlString = `${base}/${topic.id}/posts/${post.id}/favorites/create`;
-
-                await request(app).post(urlString);
-
-                const favCountBeforeDelete = await Favorite.count();
+                // First create a favorite as a signed in user
+                const createUrl = `${base}/${topic.id}/posts/${post.id}/favorites/create`;
+                await request(app)
+                    .post(createUrl)
+                    .set("x-test-user-id", user.id)
+                    .set("x-test-user-role", user.role);
 
                 const favorite = await Favorite.findOne({
                     where: {
@@ -152,11 +125,15 @@ describe("routes : favorites", () => {
                     }
                 });
 
+                const favCountBeforeDelete = await Favorite.count();
 
-                await request(app).post(`${base}/${topic.id}/posts/${post.id}/favorites/${favorite.id}/destroy`);
+                // Now try to destroy as a guest (no auth headers)
+                const res = await request(app)
+                    .post(`${base}/${topic.id}/posts/${post.id}/favorites/${favorite.id}/destroy`);
 
                 const favCountAfterDelete = await Favorite.count();
 
+                expect(res.statusCode).toBe(302);
                 expect(favCountAfterDelete).toBe(favCountBeforeDelete);
             });
         });

@@ -8,7 +8,7 @@
   "type": "module",
   "main": "src/server.js",
   "scripts": {
-    "test": "vitest run",
+    "test": "vitest run --no-file-parallelism",
     "test:watch": "vitest",
     "start": "node src/server.js"
   },
